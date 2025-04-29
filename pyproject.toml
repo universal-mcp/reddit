@@ -1,0 +1,77 @@
+# Jinja template: universal_mcp_reddit/pyproject.toml
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "universal_mcp_reddit"
+version = "0.1.0"
+description = "A Universal MCP Application: universal_mcp_reddit"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" } # Or choose another default license
+authors = [
+    { name = "Manoj Bajaj", email = "manoj@agentr.dev" },
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    # Add more classifiers as needed
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+# Add runtime dependencies here if any are known upfront
+dependencies = [
+    "universal_mcp>=0.1.11",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0.0,<9.0.0",
+    "pytest-cov", # For coverage reports
+]
+dev = [
+    # Add other development tools like linters, formatters
+    "ruff",
+    "pre-commit", # Recommended for git hooks
+]
+
+[project.scripts]
+universal_mcp_reddit = "universal_mcp_reddit:main"
+
+[project.urls]
+Homepage = "" # Add project URL later
+Repository = "" # Add repository URL later
+
+# --- Hatch Configuration ---
+[tool.hatch.version]
+path = "src/universal_mcp_reddit/__init__.py"
+
+[tool.hatch.envs.default]
+dependencies = [
+  "pytest",
+  "pytest-cov",
+]
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+test-cov = "pytest --cov-report term-missing --cov-config=pyproject.toml --cov=src/universal_mcp_reddit --cov=tests {args:tests}"
+lint = "ruff check . && ruff format --check ." # Check formatting and lint
+format = "ruff format ." # Apply formatting
+
+# Configure pytest coverage
+[tool.coverage.run]
+source = ["src/universal_mcp_reddit"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 70 # Example coverage threshold
+
+# Configure Ruff (linter/formatter)
+[tool.ruff]
+line-length = 88
+select = ["E", "W", "F", "I", "UP", "PL", "T20"] # Example selection
+ignore = []
+
+[tool.ruff.format]
+quote-style = "double"

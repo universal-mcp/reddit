@@ -1,7 +1,7 @@
 
-from universal_mcp.servers.server import SingleMCPServer
+from universal_mcp.servers import SingleMCPServer
 from universal_mcp.integrations import AgentRIntegration
-from universal_mcp.stores.store import EnvironmentStore
+from universal_mcp.stores import EnvironmentStore
 
 from universal_mcp_reddit.app import RedditApp
 

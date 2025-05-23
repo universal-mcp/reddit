@@ -54,14 +54,14 @@ Follow the steps below to set up your development environment:
 3. **Start the MCP Inspector**
 
    ```bash
-   mcp dev src/universal_mcp_reddit/mcp.py
+   mcp dev src/universal_mcp_reddit/server.py
    ```
 
    This will start the MCP inspector. Make note of the address and port shown in the console output.
 
 4. **Install the Application**
    ```bash
-   mcp install src/universal_mcp_reddit/mcp.py
+   mcp install src/universal_mcp_reddit/server.py
    ```
 
 ## 📁 Project Structure
@@ -71,7 +71,7 @@ Follow the steps below to set up your development environment:
 ├── src/
 │   └── universal_mcp_reddit/
 │       ├── __init__.py       # Package initializer
-│       ├── mcp.py            # Server entry point
+│       ├── server.py            # Server entry point
 │       ├── app.py            # Application tools
 │       └── README.md         # List of application tools
 ├── tests/                    # Test suite

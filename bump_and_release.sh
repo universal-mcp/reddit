@@ -44,8 +44,12 @@ sed -i '' "s/^version = \".*\"/version = \"$NEW_VERSION\"/" pyproject.toml
 
 echo "Version bumped from $CURRENT_VERSION to $NEW_VERSION"
 
+# Generate README for tools based on app.py
+echo "Generating tools README for src/universal_mcp_reddit/app.py..."
+universal_mcp readme src/universal_mcp_reddit/app.py
+
 # Stage the changed file
-git add pyproject.toml
+git add pyproject.toml src/universal_mcp_reddit/README.md
 
 # Commit the change
 git commit -m "bump: version $CURRENT_VERSION → $NEW_VERSION"
@@ -82,5 +86,3 @@ if [ "$1" = "release" ]; then
 else
     echo "Skipping release steps"
 fi
-
- 

@@ -2,6 +2,15 @@
 
 set -e
 
+# Ensure test dependencies are installed
+echo "Installing test dependencies..."
+uv pip install pytest
+
+# Run tests with pytest
+echo "Running tests with pytest..."
+pytest
+
+echo "Tests passed!"
 
 # Get the current branch name
 BRANCH=$(git branch --show-current)

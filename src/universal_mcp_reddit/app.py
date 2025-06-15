@@ -369,8 +369,7 @@ class RedditApp(APIApplication):
 
     def api_v1_me(self) -> Any:
         """
-        /api/v1/me
-
+        Get the current user's information.
         Returns:
             Any: API response data.
 
@@ -385,7 +384,7 @@ class RedditApp(APIApplication):
 
     def api_v1_me_karma(self) -> Any:
         """
-        /api/v1/me/karma
+        Get the current user's karma.
 
         Returns:
             Any: API response data.
@@ -401,7 +400,7 @@ class RedditApp(APIApplication):
 
     def api_v1_me_prefs(self) -> Any:
         """
-        /api/v1/me/prefs
+        Get the current user's preferences.
 
         Returns:
             Any: API response data.
@@ -417,7 +416,7 @@ class RedditApp(APIApplication):
 
     def api_v1_me_prefs1(self, accept_pms=None, activity_relevant_ads=None, allow_clicktracking=None, bad_comment_autocollapse=None, beta=None, clickgadget=None, collapse_read_messages=None, compress=None, country_code=None, creddit_autorenew=None, default_comment_sort=None, domain_details=None, email_chat_request=None, email_comment_reply=None, email_community_discovery=None, email_digests=None, email_messages=None, email_new_user_welcome=None, email_post_reply=None, email_private_message=None, email_unsubscribe_all=None, email_upvote_comment=None, email_upvote_post=None, email_user_new_follower=None, email_username_mention=None, enable_default_themes=None, enable_followers=None, feed_recommendations_enabled=None, g=None, hide_ads=None, hide_downs=None, hide_from_robots=None, hide_ups=None, highlight_controversial=None, highlight_new_comments=None, ignore_suggested_sort=None, in_redesign_beta=None, label_nsfw=None, lang=None, legacy_search=None, live_bar_recommendations_enabled=None, live_orangereds=None, mark_messages_read=None, media=None, media_preview=None, min_comment_score=None, min_link_score=None, monitor_mentions=None, newwindow=None, nightmode=None, no_profanity=None, num_comments=None, numsites=None, organic=None, other_theme=None, over_18=None, private_feeds=None, profile_opt_out=None, public_votes=None, research=None, search_include_over_18=None, send_crosspost_messages=None, send_welcome_messages=None, show_flair=None, show_gold_expiration=None, show_link_flair=None, show_location_based_recommendations=None, show_presence=None, show_promote=None, show_stylesheets=None, show_trending=None, show_twitter=None, sms_notifications_enabled=None, store_visits=None, survey_last_seen_time=None, theme_selector=None, third_party_data_personalized_ads=None, third_party_personalized_ads=None, third_party_site_data_personalized_ads=None, third_party_site_data_personalized_content=None, threaded_messages=None, threaded_modmail=None, top_karma_subreddits=None, use_global_defaults=None, video_autoplay=None, whatsapp_comment_reply=None, whatsapp_enabled=None) -> Any:
         """
-        /api/v1/me/prefs
+        Update the current user's preferences.
 
         Args:
             accept_pms (string): accept_pms Example: 'whitelisted'.
@@ -704,7 +703,7 @@ class RedditApp(APIApplication):
 
     def api_v1_me_trophies(self) -> Any:
         """
-        /api/v1/me/trophies
+        Get the current user's trophies.
 
         Returns:
             Any: API response data.
@@ -720,7 +719,7 @@ class RedditApp(APIApplication):
 
     def prefs_friends(self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /prefs/friends
+        Get the current user's friends.
 
         Args:
             after (string): fullname of a thing
@@ -744,7 +743,7 @@ class RedditApp(APIApplication):
 
     def prefs_blocked(self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /prefs/blocked
+        Get the current user's blocked users.
 
         Args:
             after (string): fullname of a thing
@@ -768,7 +767,7 @@ class RedditApp(APIApplication):
 
     def prefs_messaging(self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /prefs/messaging
+        Get the current user's messaging preferences.
 
         Args:
             after (string): fullname of a thing
@@ -792,7 +791,7 @@ class RedditApp(APIApplication):
 
     def prefs_trusted(self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /prefs/trusted
+        Get the current user's trusted users.
 
         Args:
             after (string): fullname of a thing
@@ -816,7 +815,7 @@ class RedditApp(APIApplication):
 
     def api_needs_captcha(self) -> Any:
         """
-        /api/needs_captcha
+        Check if the current user needs a captcha.
 
         Returns:
             Any: API response data.
@@ -832,7 +831,7 @@ class RedditApp(APIApplication):
 
     def api_v1_collections_collection(self, collection_id=None, include_links=None) -> Any:
         """
-        /api/v1/collections/collection
+        Get a collection by ID.
 
         Args:
             collection_id (string): the UUID of a collection
@@ -852,7 +851,7 @@ class RedditApp(APIApplication):
 
     def api_v1_collections_subreddit_collections(self) -> Any:
         """
-        /api/v1/collections/subreddit_collections
+        Get the current user's subreddit collections.
 
         Returns:
             Any: API response data.
@@ -868,7 +867,7 @@ class RedditApp(APIApplication):
 
     def api_v1_subreddit_emoji_emoji_name(self, subreddit, emoji_name) -> Any:
         """
-        /api/v1/:subreddit/emoji/:emoji_name
+        Get an emoji by name.
 
         Args:
             subreddit (string): subreddit
@@ -892,7 +891,7 @@ class RedditApp(APIApplication):
 
     def api_v1_subreddit_emojis_all(self, subreddit) -> Any:
         """
-        /api/v1/:subreddit/emojis/all
+        Get all emojis for a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -913,7 +912,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_api_flair(self, subreddit) -> Any:
         """
-        /r/:subreddit/api/flair
+        Get the current user's flair for a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -935,7 +934,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_api_flairlist(self, subreddit, after=None, before=None, count=None, limit=None, name=None, show=None, sr_detail=None) -> Any:
         """
-        /r/:subreddit/api/flairlist
+        Get the current user's flair list for a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -963,7 +962,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_api_link_flair(self, subreddit) -> Any:
         """
-        /r/:subreddit/api/link_flair
+        Get the current user's link flair for a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -984,7 +983,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_api_link_flair_v2(self, subreddit) -> Any:
         """
-        /r/:subreddit/api/link_flair_v2
+        Get the current user's link flair for a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -1005,7 +1004,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_api_user_flair(self, subreddit) -> Any:
         """
-        /r/:subreddit/api/user_flair
+        Get the current user's user flair for a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -1026,7 +1025,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_api_user_flair_v2(self, subreddit) -> Any:
         """
-        /r/:subreddit/api/user_flair_v2
+        Get the current user's user flair for a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -1047,7 +1046,7 @@ class RedditApp(APIApplication):
 
     def api_info(self, id=None, sr_name=None, url=None) -> Any:
         """
-        /api/info
+        Get information about a link or comment.
 
         Args:
             id (string): A comma-separated list of thing fullnames
@@ -1068,7 +1067,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_api_info(self, subreddit, id=None, sr_name=None, url=None) -> Any:
         """
-        r/:subreddit/api/info
+        Get information about a link or comment in a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -1081,7 +1080,7 @@ class RedditApp(APIApplication):
 
         Tags:
             links & comments
-        """
+        """ 
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/{subreddit}/api/info"
@@ -1092,7 +1091,7 @@ class RedditApp(APIApplication):
 
     def api_morechildren(self, api_type=None, children=None, depth=None, id=None, limit_children=None, link_id=None, sort=None) -> Any:
         """
-        /api/morechildren
+        Get more children for a link or comment.
 
         Args:
             api_type (string): the string "json" Example: 'json'.
@@ -1117,7 +1116,7 @@ class RedditApp(APIApplication):
 
     def api_saved_categories(self) -> Any:
         """
-        /api/saved_categories
+        Get the current user's saved categories.
 
         Returns:
             Any: API response data.
@@ -1133,7 +1132,7 @@ class RedditApp(APIApplication):
 
     def req(self) -> Any:
         """
-        /req
+        Get the current user's requests.
 
         Returns:
             Any: API response data.
@@ -1149,7 +1148,7 @@ class RedditApp(APIApplication):
 
     def best(self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /best
+        Get the best posts.
 
         Args:
             after (string): fullname of a thing
@@ -1173,7 +1172,7 @@ class RedditApp(APIApplication):
 
     def by_id_names(self, names) -> Any:
         """
-        /by_id/:names
+        Get posts by ID.
 
         Args:
             names (string): names
@@ -1194,7 +1193,7 @@ class RedditApp(APIApplication):
 
     def comments_article(self, article, comment=None, context=None, depth=None, limit=None, showedits=None, showmedia=None, showmore=None, showtitle=None, sort=None, sr_detail=None, theme=None, threaded=None, truncate=None) -> Any:
         """
-        /comments/:article
+        Get comments for a post.
 
         Args:
             article (string): article
@@ -1228,7 +1227,7 @@ class RedditApp(APIApplication):
 
     def controversial(self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /controversial
+        Get the most controversial posts.
 
         Args:
             after (string): fullname of a thing
@@ -1252,7 +1251,7 @@ class RedditApp(APIApplication):
 
     def duplicates_article(self, article, after=None, before=None, count=None, crossposts_only=None, limit=None, show=None, sort=None, sr=None, sr_detail=None) -> Any:
         """
-        /duplicates/:article
+        Get duplicate posts.
 
         Args:
             article (string): article
@@ -1282,7 +1281,7 @@ class RedditApp(APIApplication):
 
     def hot(self, g=None, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /hot
+        Get the hottest posts.
 
         Args:
             g (string): one of (GLOBAL, US, AR, AU, BG, CA, CL, CO, HR, CZ, FI, FR, DE, GR, HU, IS, IN, IE, IT, JP, MY, MX, NZ, PH, PL, PT, PR, RO, RS, SG, ES, SE, TW, TH, TR, GB, US_WA, US_DE, US_DC, US_WI, US_WV, US_HI, US_FL, US_WY, US_NH, US_NJ, US_NM, US_TX, US_LA, US_NC, US_ND, US_NE, US_TN, US_NY, US_PA, US_CA, US_NV, US_VA, US_CO, US_AK, US_AL, US_AR, US_VT, US_IL, US_GA, US_IN, US_IA, US_OK, US_AZ, US_ID, US_CT, US_ME, US_MD, US_MA, US_OH, US_UT, US_MO, US_MN, US_MI, US_RI, US_KS, US_MT, US_MS, US_SC, US_KY, US_OR, US_SD)
@@ -1307,7 +1306,7 @@ class RedditApp(APIApplication):
 
     def new(self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /new
+        Get the newest posts.
 
         Args:
             after (string): fullname of a thing
@@ -1331,7 +1330,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_comments_article(self, subreddit, article, comment=None, context=None, depth=None, limit=None, showedits=None, showmedia=None, showmore=None, showtitle=None, sort=None, sr_detail=None, theme=None, threaded=None, truncate=None) -> Any:
         """
-        /r/:subreddit/comments/:article
+        Get comments for a post in a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -1368,7 +1367,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_controversial(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /r/:subreddit/controversial
+        Get the most controversial posts in a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -1395,7 +1394,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_hot(self, subreddit, g=None, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /r/:subreddit/hot
+        Get the hottest posts in a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -1423,7 +1422,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_new(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /r/:subreddit/new
+        Get the newest posts in a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -1450,7 +1449,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_random(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /r/:subreddit/random
+        Get a random post in a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -1477,7 +1476,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_rising(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /r/:subreddit/rising
+        Get the rising posts in a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -1504,7 +1503,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_top(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /r/:subreddit/top
+        Get the top posts in a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -1531,7 +1530,7 @@ class RedditApp(APIApplication):
 
     def random(self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /random
+        Get a random post.
 
         Args:
             after (string): fullname of a thing
@@ -1555,7 +1554,7 @@ class RedditApp(APIApplication):
 
     def rising(self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /rising
+        Get the rising posts.
 
         Args:
             after (string): fullname of a thing
@@ -1579,7 +1578,7 @@ class RedditApp(APIApplication):
 
     def top(self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /top
+        Get the top posts.
 
         Args:
             after (string): fullname of a thing
@@ -1603,7 +1602,7 @@ class RedditApp(APIApplication):
 
     def api_saved_media_text(self, url=None) -> Any:
         """
-        /api/saved_media_text
+        Get the text of a saved media.
 
         Args:
             url (string): a valid URL
@@ -1622,7 +1621,7 @@ class RedditApp(APIApplication):
 
     def api_v1_scopes(self, scopes=None) -> Any:
         """
-        /api/v1/scopes
+        Get the current user's scopes.
 
         Args:
             scopes (string): (optional) An OAuth2 scope string
@@ -1641,7 +1640,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_api_saved_media_text(self, subreddit, url=None) -> Any:
         """
-        /r/:subreddit/api/saved_media_text
+        Get the text of a saved media in a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -1663,7 +1662,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_about_log(self, subreddit, after=None, before=None, count=None, limit=None, mod=None, show=None, sr_detail=None, type=None) -> Any:
         """
-        /r/:subreddit/about/log
+        Get the log of a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -1692,7 +1691,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_about_edited(self, subreddit, after=None, before=None, count=None, limit=None, location=None, only=None, show=None, sr_detail=None) -> Any:
         """
-        /r/:subreddit/about/edited
+        Get the edited posts in a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -1721,7 +1720,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_about_modqueue(self, subreddit, after=None, before=None, count=None, limit=None, location=None, only=None, show=None, sr_detail=None) -> Any:
         """
-        /r/:subreddit/about/modqueue
+        Get the modqueue in a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -1750,7 +1749,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_about_reports(self, subreddit, after=None, before=None, count=None, limit=None, location=None, only=None, show=None, sr_detail=None) -> Any:
         """
-        /r/:subreddit/about/reports
+        Get the reports in a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -1779,7 +1778,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_about_spam(self, subreddit, after=None, before=None, count=None, limit=None, location=None, only=None, show=None, sr_detail=None) -> Any:
         """
-        /r/:subreddit/about/spam
+        Get the spam posts in a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -1808,7 +1807,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_about_unmoderated(self, subreddit, after=None, before=None, count=None, limit=None, location=None, only=None, show=None, sr_detail=None) -> Any:
         """
-        /r/:subreddit/about/unmoderated
+        Get the unmoderated posts in a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -1837,7 +1836,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_stylesheet(self, subreddit) -> Any:
         """
-        /r/:subreddit/stylesheet
+        Get the stylesheet of a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -1858,7 +1857,7 @@ class RedditApp(APIApplication):
 
     def stylesheet(self) -> Any:
         """
-        /stylesheet
+        Get the stylesheet of the current user.
 
         Returns:
             Any: API response data.
@@ -1874,7 +1873,7 @@ class RedditApp(APIApplication):
 
     def api_mod_notes1(self, before=None, filter=None, limit=None, subreddit=None, user=None) -> Any:
         """
-        /api/mod/notes
+        Get the mod notes of a subreddit.
 
         Args:
             before (string): (optional) an encoded string used for pagination with mod notes
@@ -1897,7 +1896,7 @@ class RedditApp(APIApplication):
 
     def api_mod_notes(self, note_id=None, subreddit=None, user=None) -> Any:
         """
-        /api/mod/notes
+        Delete a mod note.
 
         Args:
             note_id (string): a unique ID for the note to be deleted (should have a ModNote_ prefix)
@@ -1918,7 +1917,7 @@ class RedditApp(APIApplication):
 
     def api_mod_notes_recent(self, before=None, filter=None, limit=None, subreddits=None, user=None) -> Any:
         """
-        /api/mod/notes/recent
+        Get the recent mod notes.
 
         Args:
             before (string): (optional) an encoded string used for pagination with mod notes
@@ -1941,7 +1940,7 @@ class RedditApp(APIApplication):
 
     def api_multi_mine(self, expand_srs=None) -> Any:
         """
-        /api/multi/mine
+        Get the current user's multi.
 
         Args:
             expand_srs (string): boolean value (true, false)
@@ -1960,7 +1959,7 @@ class RedditApp(APIApplication):
 
     def api_multi_user_username(self, username, expand_srs=None) -> Any:
         """
-        /api/multi/user/:username
+        Get a user's multi.
 
         Args:
             username (string): username
@@ -1982,7 +1981,7 @@ class RedditApp(APIApplication):
 
     def api_multi_multipath1(self, multipath, expand_srs=None) -> Any:
         """
-        /api/multi/:multipath
+        Get a multi.
 
         Args:
             multipath (string): multipath
@@ -2004,7 +2003,7 @@ class RedditApp(APIApplication):
 
     def api_multi_multipath(self, multipath, expand_srs=None) -> Any:
         """
-        /api/multi/:multipath
+        Delete a multi.
 
         Args:
             multipath (string): multipath
@@ -2026,7 +2025,7 @@ class RedditApp(APIApplication):
 
     def api_multi_multipath_description(self, multipath) -> Any:
         """
-        /api/multi/:multipath/description
+        Get a multi's description.
 
         Args:
             multipath (string): multipath
@@ -2047,7 +2046,7 @@ class RedditApp(APIApplication):
 
     def api_multi_multipath_rsubreddit1(self, multipath, subreddit) -> Any:
         """
-        /api/multi/:multipath/r/:subreddit
+        Get a multi's subreddit.
 
         Args:
             multipath (string): multipath
@@ -2071,7 +2070,7 @@ class RedditApp(APIApplication):
 
     def api_multi_multipath_rsubreddit(self, multipath, subreddit) -> Any:
         """
-        /api/multi/:multipath/r/:subreddit
+        Delete a multi's subreddit.
 
         Args:
             multipath (string): multipath
@@ -2095,7 +2094,7 @@ class RedditApp(APIApplication):
 
     def api_mod_conversations(self, after=None, entity=None, limit=None, sort=None, state=None) -> Any:
         """
-        /api/mod/conversations
+        Get the mod conversations.
 
         Args:
             after (string): A ModMail Converstion ID, in the form ModmailConversation_<id>
@@ -2118,7 +2117,7 @@ class RedditApp(APIApplication):
 
     def api_mod_conversations_conversation_id(self, conversation_id, markRead=None) -> Any:
         """
-        /api/mod/conversations/:conversation_id
+        Get a mod conversation.
 
         Args:
             conversation_id (string): conversation_id
@@ -2140,7 +2139,7 @@ class RedditApp(APIApplication):
 
     def api_mod_conversations_conversation_id_highlight(self, conversation_id) -> Any:
         """
-        /api/mod/conversations/:conversation_id/highlight
+        Highlight a mod conversation.
 
         Args:
             conversation_id (string): conversation_id
@@ -2161,7 +2160,7 @@ class RedditApp(APIApplication):
 
     def api_mod_conversations_conversation_id_unarchive(self, conversation_id) -> Any:
         """
-        /api/mod/conversations/:conversation_id/unarchive
+        Unarchive a mod conversation.
 
         Args:
             conversation_id (string): conversation_id
@@ -2182,7 +2181,7 @@ class RedditApp(APIApplication):
 
     def api_mod_conversations_conversation_id_unban(self, conversation_id) -> Any:
         """
-        /api/mod/conversations/:conversation_id/unban
+        Unban a mod conversation.
 
         Args:
             conversation_id (string): conversation_id
@@ -2203,7 +2202,7 @@ class RedditApp(APIApplication):
 
     def api_mod_conversations_conversation_id_unmute(self, conversation_id) -> Any:
         """
-        /api/mod/conversations/:conversation_id/unmute
+        Unmute a mod conversation.
 
         Args:
             conversation_id (string): conversation_id
@@ -2224,7 +2223,7 @@ class RedditApp(APIApplication):
 
     def api_mod_conversations_conversation_id_user(self, conversation_id) -> Any:
         """
-        /api/mod/conversations/:conversation_id/user
+        Get a mod conversation's user.
 
         Args:
             conversation_id (string): conversation_id
@@ -2245,7 +2244,7 @@ class RedditApp(APIApplication):
 
     def api_mod_conversations_subreddits(self) -> Any:
         """
-        /api/mod/conversations/subreddits
+        Get the mod conversations' subreddits.
 
         Returns:
             Any: API response data.
@@ -2261,7 +2260,7 @@ class RedditApp(APIApplication):
 
     def api_mod_conversations_unread_count(self) -> Any:
         """
-        /api/mod/conversations/unread/count
+        Get the unread count of the mod conversations.
 
         Returns:
             Any: API response data.
@@ -2277,7 +2276,7 @@ class RedditApp(APIApplication):
 
     def message_inbox(self, mark=None, mid=None, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /message/inbox
+        Get the current user's inbox.
 
         Args:
             mark (string): one of (true, false)
@@ -2303,7 +2302,7 @@ class RedditApp(APIApplication):
 
     def message_sent(self, mark=None, mid=None, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /message/sent
+        Get the current user's sent messages.
 
         Args:
             mark (string): one of (true, false)
@@ -2329,7 +2328,7 @@ class RedditApp(APIApplication):
 
     def message_unread(self, mark=None, mid=None, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /message/unread
+        Get the current user's unread messages.
 
         Args:
             mark (string): one of (true, false)
@@ -2355,7 +2354,7 @@ class RedditApp(APIApplication):
 
     def search(self, after=None, before=None, category=None, count=None, include_facets=None, limit=None, q=None, restrict_sr=None, show=None, sort=None, sr_detail=None, t=None, type=None) -> Any:
         """
-        /search
+        Search for posts, comments, and users.
 
         Args:
             after (string): fullname of a thing
@@ -2386,7 +2385,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_search(self, subreddit, after=None, before=None, category=None, count=None, include_facets=None, limit=None, q=None, restrict_sr=None, show=None, sort=None, sr_detail=None, t=None, type=None) -> Any:
         """
-        /r/:subreddit/search
+        Search for posts, comments, and users in a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -2421,7 +2420,7 @@ class RedditApp(APIApplication):
 
     def api_search_reddit_names(self, exact=None, include_over_18=None, include_unadvertisable=None, query=None, search_query_id=None, typeahead_active=None) -> Any:
         """
-        /api/search_reddit_names
+        Search for subreddits.
 
         Args:
             exact (string): boolean value (true, false) Example: 'false'.
@@ -2445,7 +2444,7 @@ class RedditApp(APIApplication):
 
     def api_subreddit_autocomplete(self, include_over_18=None, include_profiles=None, query=None) -> Any:
         """
-        /api/subreddit_autocomplete
+        Search for subreddits.
 
         Args:
             include_over_18 (string): boolean value (true, false)
@@ -2466,7 +2465,7 @@ class RedditApp(APIApplication):
 
     def api_subreddit_autocomplete_v2(self, include_over_18=None, include_profiles=None, limit=None, query=None, search_query_id=None, typeahead_active=None) -> Any:
         """
-        /api/subreddit_autocomplete_v2
+        Search for subreddits.
 
         Args:
             include_over_18 (string): boolean value (true, false)
@@ -2490,7 +2489,7 @@ class RedditApp(APIApplication):
 
     def api_v1_subreddit_post_requirements(self, subreddit) -> Any:
         """
-        /api/v1/:subreddit/post_requirements
+        Get the post requirements for a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -2511,7 +2510,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_about_banned(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None, user=None) -> Any:
         """
-        /r/:subreddit/about/banned
+        Get the banned users in a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -2539,7 +2538,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_about(self, subreddit) -> Any:
         """
-        /r/:subreddit/about
+        Get the about information for a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -2560,7 +2559,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_about_edit(self, subreddit) -> Any:
         """
-        /r/:subreddit/about/edit
+        Get the edit information for a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -2581,7 +2580,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_about_contributors(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None, user=None) -> Any:
         """
-        /r/:subreddit/about/contributors
+        Get the contributors for a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -2609,7 +2608,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_about_moderators(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None, user=None) -> Any:
         """
-        /r/:subreddit/about/moderators
+        Get the moderators for a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -2637,7 +2636,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_about_muted(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None, user=None) -> Any:
         """
-        /r/:subreddit/about/muted
+        Get the muted users for a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -2665,7 +2664,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_about_rules(self, subreddit) -> Any:
         """
-        /r/:subreddit/about/rules
+        Get the rules for a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -2686,7 +2685,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_about_sticky(self, subreddit, num=None) -> Any:
         """
-        /r/:subreddit/about/sticky
+        Get the sticky posts for a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -2708,7 +2707,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_about_traffic(self, subreddit) -> Any:
         """
-        /r/:subreddit/about/traffic
+        Get the traffic for a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -2729,7 +2728,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_about_wikibanned(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None, user=None) -> Any:
         """
-        /r/:subreddit/about/wikibanned
+        Get the wikibanned users for a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -2757,7 +2756,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_about_wikicontributors(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None, user=None) -> Any:
         """
-        /r/:subreddit/about/wikicontributors
+        Get the wikicontributors for a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -2785,7 +2784,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_api_submit_text(self, subreddit) -> Any:
         """
-        /r/:subreddit/api/submit_text
+        Get the submit text for a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -2806,7 +2805,7 @@ class RedditApp(APIApplication):
 
     def subreddits_mine_where(self, where, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /subreddits/mine/:where
+        Get the subreddits the current user has access to.
 
         Args:
             where (string): where
@@ -2833,7 +2832,7 @@ class RedditApp(APIApplication):
 
     def subreddits_search(self, after=None, before=None, count=None, limit=None, q=None, search_query_id=None, show=None, show_users=None, sort=None, sr_detail=None, typeahead_active=None) -> Any:
         """
-        /subreddits/search
+        Search for subreddits.
 
         Args:
             after (string): fullname of a thing
@@ -2862,7 +2861,7 @@ class RedditApp(APIApplication):
 
     def subreddits_where(self, where, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /subreddits/:where
+        Get the subreddits the current user has access to.
 
         Args:
             where (string): where
@@ -2889,7 +2888,7 @@ class RedditApp(APIApplication):
 
     def api_user_data_by_account_ids(self, ids=None) -> Any:
         """
-        /api/user_data_by_account_ids
+        Get the user data by account IDs.
 
         Args:
             ids (string): A comma-separated list of account fullnames
@@ -2908,7 +2907,7 @@ class RedditApp(APIApplication):
 
     def api_username_available(self, user=None) -> Any:
         """
-        /api/username_available
+        Check if a username is available.
 
         Args:
             user (string): a valid, unused, username
@@ -2927,7 +2926,7 @@ class RedditApp(APIApplication):
 
     def api_v1_me_friends_username1(self, username, id=None) -> Any:
         """
-        /api/v1/me/friends/:username
+        Get a user's friends.
 
         Args:
             username (string): username
@@ -2949,7 +2948,7 @@ class RedditApp(APIApplication):
 
     def api_v1_me_friends_username(self, username, id=None) -> Any:
         """
-        /api/v1/me/friends/:username
+        Delete a user's friend.
 
         Args:
             username (string): username
@@ -2971,7 +2970,7 @@ class RedditApp(APIApplication):
 
     def api_v1_user_username_trophies(self, username, id=None) -> Any:
         """
-        /api/v1/user/:username/trophies
+        Get a user's trophies.
 
         Args:
             username (string): username
@@ -2993,7 +2992,7 @@ class RedditApp(APIApplication):
 
     def user_username_about(self, username) -> Any:
         """
-        /user/:username/about
+        Get the about information for a user.
 
         Args:
             username (string): username
@@ -3014,7 +3013,7 @@ class RedditApp(APIApplication):
 
     def user_username_where(self, username, where, after=None, before=None, context=None, count=None, limit=None, show=None, sort=None, sr_detail=None, t=None, type=None) -> Any:
         """
-        /user/:username/:where
+        Get the user's posts or comments.
 
         Args:
             username (string): username
@@ -3048,7 +3047,7 @@ class RedditApp(APIApplication):
 
     def users_search(self, after=None, before=None, count=None, limit=None, q=None, search_query_id=None, show=None, sort=None, sr_detail=None, typeahead_active=None) -> Any:
         """
-        /users/search
+        Search for users.
 
         Args:
             after (string): fullname of a thing
@@ -3076,7 +3075,7 @@ class RedditApp(APIApplication):
 
     def users_where(self, where, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /users/:where
+        Get the user's posts or comments.
 
         Args:
             where (string): where
@@ -3103,7 +3102,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_api_widgets(self, subreddit) -> Any:
         """
-        /r/:subreddit/api/widgets
+        Get the widgets for a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -3124,7 +3123,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_api_widget_order_section(self, subreddit, section, items=None) -> Any:
         """
-        /r/:subreddit/api/widget_order/:section
+        Get the widget order for a subreddit.
 
         Args:
             subreddit (string): subreddit
@@ -3150,7 +3149,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_api_widget_widget_id(self, subreddit, widget_id) -> Any:
         """
-        /r/:subreddit/api/widget/:widget_id
+        Delete a widget.
 
         Args:
             subreddit (string): subreddit
@@ -3174,7 +3173,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_wiki_discussions_page(self, subreddit, page, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /r/:subreddit/wiki/discussions/:page
+        Get the discussions for a wiki page.
 
         Args:
             subreddit (string): subreddit
@@ -3204,7 +3203,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_wiki_page(self, subreddit, page, v=None, v2=None) -> Any:
         """
-        /r/:subreddit/wiki/:page
+        Get a wiki page.
 
         Args:
             subreddit (string): subreddit
@@ -3230,7 +3229,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_wiki_pages(self, subreddit) -> Any:
         """
-        /r/:subreddit/wiki/pages
+        Get the pages for a wiki.
 
         Args:
             subreddit (string): subreddit
@@ -3251,7 +3250,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_wiki_revisions(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /r/:subreddit/wiki/revisions
+        Get the revisions for a wiki.
 
         Args:
             subreddit (string): subreddit
@@ -3278,7 +3277,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_wiki_revisions_page(self, subreddit, page, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
-        /r/:subreddit/wiki/revisions/:page
+        Get the revisions for a wiki page.
 
         Args:
             subreddit (string): subreddit
@@ -3308,7 +3307,7 @@ class RedditApp(APIApplication):
 
     def r_subreddit_wiki_settings_page(self, subreddit, page) -> Any:
         """
-        /r/:subreddit/wiki/settings/:page
+        Get the settings for a wiki page.
 
         Args:
             subreddit (string): subreddit

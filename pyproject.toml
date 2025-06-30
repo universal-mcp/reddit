@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "universal-mcp-reddit"
-version = "0.1.4"
+version = "0.1.5"
 description = "A Universal MCP Application: universal_mcp_reddit"
 readme = "README.md"
 requires-python = ">=3.11"

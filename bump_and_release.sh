@@ -2,63 +2,62 @@
 
 set -e
 
-# Ensure test dependencies are installed
-echo "Installing test dependencies..."
-uv pip install pytest
-
-# Run tests with pytest
-echo "Running tests with pytest..."
-pytest
-
-echo "Tests passed!"
-
 # Get the current branch name
-BRANCH=$(git branch --show-current)
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
 # Read the current version from pyproject.toml
 CURRENT_VERSION=$(grep -E '^version = "[0-9]+\.[0-9]+\.[0-9]+.*"' pyproject.toml | cut -d'"' -f2)
 
 # Split version into major, minor, patch
-IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+MAJOR=$(echo "$CURRENT_VERSION" | cut -d. -f1)
+MINOR=$(echo "$CURRENT_VERSION" | cut -d. -f2)
+PATCH=$(echo "$CURRENT_VERSION" | cut -d. -f3)
 
 # Remove any rc suffix from PATCH if it exists
-PATCH_NUM=$(echo $PATCH | sed 's/-rc[0-9]*//')
+PATCH_NUM=$(echo "$PATCH" | sed 's/-rc[0-9]*//')
 
 if [ "$BRANCH" = "master" ]; then
     # On main branch - bump patch version
-    if [[ $PATCH == *"-rc"* ]]; then
-        NEW_VERSION="$MAJOR.$MINOR.$PATCH_NUM"
-    else
-        # Increase patch number by 1
-        PATCH_NUM=$((PATCH_NUM + 1))
-        NEW_VERSION="$MAJOR.$MINOR.$PATCH_NUM"
-    fi
+    case "$PATCH" in
+        *-rc*)
+            NEW_VERSION="$MAJOR.$MINOR.$PATCH_NUM"
+            ;;
+        *)
+            PATCH_NUM=$((PATCH_NUM + 1))
+            NEW_VERSION="$MAJOR.$MINOR.$PATCH_NUM"
+            ;;
+    esac
 else
     # On dev branch - bump rc version
-    if [[ $PATCH == *"-rc"* ]]; then
-        # If already has rc, increment rc number
-        RC_NUM=$(echo $PATCH | grep -o 'rc[0-9]*' | sed 's/rc//')
-        NEW_VERSION="$MAJOR.$MINOR.$PATCH_NUM-rc$((RC_NUM + 1))"
-    else
-        echo "No rc suffix found, adding rc1"
-        # Increase patch number by 1
-        PATCH_NUM=$((PATCH_NUM + 1))
-        # Add rc1
-        NEW_VERSION="$MAJOR.$MINOR.$PATCH_NUM-rc1"
-    fi
+    case "$PATCH" in
+        *-rc*)
+            RC_NUM=$(echo "$PATCH" | grep -o 'rc[0-9]*' | sed 's/rc//')
+            RC_NUM=${RC_NUM:-0}
+            RC_NUM=$((RC_NUM + 1))
+            NEW_VERSION="$MAJOR.$MINOR.$PATCH_NUM-rc$RC_NUM"
+            ;;
+        *)
+            echo "No rc suffix found, adding rc1"
+            PATCH_NUM=$((PATCH_NUM + 1))
+            NEW_VERSION="$MAJOR.$MINOR.$PATCH_NUM-rc1"
+            ;;
+    esac
 fi
 
 # Update version in pyproject.toml
-sed -i '' "s/^version = \".*\"/version = \"$NEW_VERSION\"/" pyproject.toml
+# Use portable sed for both GNU and BSD (macOS)
+if sed --version >/dev/null 2>&1; then
+    # GNU sed
+    sed -i "s/^version = \".*\"/version = \"$NEW_VERSION\"/" pyproject.toml
+else
+    # BSD/macOS sed
+    sed -i '' "s/^version = \".*\"/version = \"$NEW_VERSION\"/" pyproject.toml
+fi
 
 echo "Version bumped from $CURRENT_VERSION to $NEW_VERSION"
 
-# Generate README for tools based on app.py
-echo "Generating tools README for src/universal_mcp_reddit/app.py..."
-universal_mcp readme src/universal_mcp_reddit/app.py
-
 # Stage the changed file
-git add pyproject.toml src/universal_mcp_reddit/README.md
+git add pyproject.toml
 
 # Commit the change
 git commit -m "bump: version $CURRENT_VERSION → $NEW_VERSION"
@@ -67,12 +66,11 @@ git commit -m "bump: version $CURRENT_VERSION → $NEW_VERSION"
 if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "develop" ] || [ "$BRANCH" = "master" ] || [ "$BRANCH" = "dev" ]; then
     git tag -a "v$NEW_VERSION" -m "Release version $NEW_VERSION"
     # Push both the branch and tag in one command
-    git push origin $BRANCH "v$NEW_VERSION"
+    git push origin "$BRANCH" "v$NEW_VERSION"
 else
     # Push only the branch if not on main/develop
-    git push origin $BRANCH
+    git push origin "$BRANCH"
 fi
-
 
 # Either release is passed as arg or not
 if [ "$1" = "release" ]; then
@@ -90,8 +88,9 @@ if [ "$1" = "release" ]; then
     rm -rf .idea
     rm -rf .vscode
 
-    uv sync && uv build && uv publish
+    uv sync --all-extras && uv run pytest && uv build && uv publish
     echo "Release complete!"
 else
     echo "Skipping release steps"
 fi
+

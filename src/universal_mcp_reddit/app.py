@@ -11,6 +11,7 @@ class RedditApp(APIApplication):
     def __init__(self, integration: Integration) -> None:
         super().__init__(name="reddit", integration=integration)
         self.base_api_url = "https://oauth.reddit.com"
+        self.base_url = "https://oauth.reddit.com"
 
     def _post(self, url, data):
         try:

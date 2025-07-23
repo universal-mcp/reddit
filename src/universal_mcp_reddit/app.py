@@ -3477,6 +3477,6 @@ class RedditApp(APIApplication):
             self.r_subreddit_wiki_revisions,
             self.r_subreddit_wiki_revisions_page,
             self.r_subreddit_wiki_settings_page,
-            self.get_post_comments_json,
+            self.get_post_comments_details,
         ]
 

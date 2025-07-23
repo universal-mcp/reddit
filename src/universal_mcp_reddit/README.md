@@ -45,6 +45,8 @@ This is automatically generated from OpenAPI schema for the RedditApp API.
 | `best` | Get the best posts. |
 | `by_id_names` | Get posts by ID. |
 | `comments_article` | Get comments for a post. |
+| `get_post_comments_details` | Get post details and comments like title, author, score, etc. |
+
 | `controversial` | Get the most controversial posts. |
 | `duplicates_article` | Get duplicate posts. |
 | `hot` | Get the hottest posts. |

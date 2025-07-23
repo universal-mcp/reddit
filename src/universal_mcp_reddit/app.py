@@ -1226,6 +1226,28 @@ class RedditApp(APIApplication):
         response.raise_for_status()
         return response.json()
 
+    def get_post_comments_details(self, post_id: str) -> Any:
+        """
+        Get post details and comments like title, author, score, etc.
+
+        Args:
+            post_id (string): The Reddit post ID ( e.g. '1m734tx' for https://www.reddit.com/r/mcp/comments/1m734tx/comment/n4occ77/)
+
+        Returns:
+            Any: API response data containing post details and comments.
+
+        Tags:
+            listings, comments, posts, important
+        """
+        
+        
+        url = f"{self.base_url}/comments/{post_id}.json"
+        query_params = {}
+        response = self._get(url, params=query_params)
+        return self._handle_response(response)
+
+
+
     def controversial(self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
         """
         Get the most controversial posts.
@@ -3455,5 +3477,6 @@ class RedditApp(APIApplication):
             self.r_subreddit_wiki_revisions,
             self.r_subreddit_wiki_revisions_page,
             self.r_subreddit_wiki_settings_page,
+            self.get_post_comments_json,
         ]
-        
+

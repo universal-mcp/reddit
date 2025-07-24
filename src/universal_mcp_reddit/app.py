@@ -46,7 +46,7 @@ class RedditApp(APIApplication):
 
     def get_subreddit_posts(
         self, subreddit: str, limit: int = 5, timeframe: str = "day"
-    ) -> str:
+    ) -> dict[str, Any]:
         """
         Retrieves and formats top posts from a specified subreddit within a given timeframe using the Reddit API
 
@@ -78,31 +78,8 @@ class RedditApp(APIApplication):
             f"Requesting top {limit} posts from r/{subreddit} for timeframe '{timeframe}'"
         )
         response = self._get(url, params=params)
-        data = response.json()
-        if "error" in data:
-            logger.error(
-                f"Reddit API error: {data['error']} - {data.get('message', '')}"
-            )
-            return f"Error from Reddit API: {data['error']} - {data.get('message', '')}"
-        posts = data.get("data", {}).get("children", [])
-        if not posts:
-            return (
-                f"No top posts found in r/{subreddit} for the timeframe '{timeframe}'."
-            )
-        result_lines = [
-            f"Top {len(posts)} posts from r/{subreddit} (timeframe: {timeframe}):\n"
-        ]
-        for i, post_container in enumerate(posts):
-            post = post_container.get("data", {})
-            title = post.get("title", "No Title")
-            score = post.get("score", 0)
-            author = post.get("author", "Unknown Author")
-            permalink = post.get("permalink", "")
-            full_url = f"https://www.reddit.com{permalink}" if permalink else "No Link"
-
-            result_lines.append(f'{i + 1}. "{title}" by u/{author} (Score: {score})')
-            result_lines.append(f"   Link: {full_url}")
-        return "\n".join(result_lines)
+        return self._handle_response(response)
+        
 
     def search_subreddits(
         self, query: str, limit: int = 5, sort: str = "relevance"
@@ -144,37 +121,10 @@ class RedditApp(APIApplication):
             f"Searching for subreddits matching '{query}' (limit: {limit}, sort: {sort})"
         )
         response = self._get(url, params=params)
-        data = response.json()
-        if "error" in data:
-            logger.error(
-                f"Reddit API error during subreddit search: {data['error']} - {data.get('message', '')}"
-            )
-            return f"Error from Reddit API during search: {data['error']} - {data.get('message', '')}"
-        subreddits = data.get("data", {}).get("children", [])
-        if not subreddits:
-            return f"No subreddits found matching the query '{query}'."
-        result_lines = [
-            f"Found {len(subreddits)} subreddits matching '{query}' (sorted by {sort}):\n"
-        ]
-        for i, sub_container in enumerate(subreddits):
-            sub_data = sub_container.get("data", {})
-            display_name = sub_data.get("display_name", "N/A")  # e.g., 'python'
-            title = sub_data.get(
-                "title", "No Title"
-            )  # Often the same as display_name or slightly longer
-            subscribers = sub_data.get("subscribers", 0)
-            # Use public_description if available, fallback to title
-            description = sub_data.get("public_description", "").strip() or title
-
-            # Format subscriber count nicely
-            subscriber_str = f"{subscribers:,}" if subscribers else "Unknown"
-
-            result_lines.append(
-                f"{i + 1}. r/{display_name} ({subscriber_str} subscribers)"
-            )
-            if description:
-                result_lines.append(f"   Description: {description}")
-        return "\n".join(result_lines)
+        return self._handle_response(response)
+        
+            
+            
 
     def get_post_flairs(self, subreddit: str):
         """

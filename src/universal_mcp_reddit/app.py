@@ -1,13 +1,13 @@
 import httpx
 from loguru import logger
 from typing import Any
-
 from universal_mcp.applications import APIApplication
 from universal_mcp.exceptions import NotAuthorizedError
 from universal_mcp.integrations import Integration
 
 
 class RedditApp(APIApplication):
+
     def __init__(self, integration: Integration) -> None:
         super().__init__(name="reddit", integration=integration)
         self.base_api_url = "https://oauth.reddit.com"
@@ -38,7 +38,6 @@ class RedditApp(APIApplication):
         if "access_token" not in credentials:
             logger.error("Reddit credentials found but missing 'access_token'.")
             raise ValueError("Invalid Reddit credentials format.")
-
         return {
             "Authorization": f"Bearer {credentials['access_token']}",
             "User-Agent": "agentr-reddit-app/0.1 by AgentR",
@@ -63,7 +62,7 @@ class RedditApp(APIApplication):
             JSONDecodeError: When the API response contains invalid JSON
 
         Tags:
-            fetch, reddit, api, list, social-media, important, read-only
+            fetch, reddit, api, list, social-media, important, read-only, readOnlyHint
         """
         valid_timeframes = ["hour", "day", "week", "month", "year", "all"]
         if timeframe not in valid_timeframes:
@@ -79,7 +78,6 @@ class RedditApp(APIApplication):
         )
         response = self._get(url, params=params)
         return self._handle_response(response)
-        
 
     def search_subreddits(
         self, query: str, limit: int = 5, sort: str = "relevance"
@@ -100,7 +98,7 @@ class RedditApp(APIApplication):
             JSONDecodeError: When the API response contains invalid JSON
 
         Tags:
-            search, important, reddit, api, query, format, list, validation
+            search, important, reddit, api, query, format, list, validation, readOnlyHint
         """
         valid_sorts = ["relevance", "activity"]
         if sort not in valid_sorts:
@@ -110,21 +108,12 @@ class RedditApp(APIApplication):
                 f"Error: Invalid limit '{limit}'. Please use a value between 1 and 100."
             )
         url = f"{self.base_api_url}/subreddits/search"
-        params = {
-            "q": query,
-            "limit": limit,
-            "sort": sort,
-            # Optionally include NSFW results? Defaulting to false for safety.
-            # "include_over_18": "false"
-        }
+        params = {"q": query, "limit": limit, "sort": sort}
         logger.info(
             f"Searching for subreddits matching '{query}' (limit: {limit}, sort: {sort})"
         )
         response = self._get(url, params=params)
         return self._handle_response(response)
-        
-            
-            
 
     def get_post_flairs(self, subreddit: str):
         """
@@ -141,8 +130,7 @@ class RedditApp(APIApplication):
             JSONDecodeError: When the API response contains invalid JSON data
 
         Tags:
-            fetch, get, reddit, flair, api, read-only
-        """
+            fetch, get, reddit, flair, api, read-only, readOnlyHint"""
         url = f"{self.base_api_url}/r/{subreddit}/api/link_flair_v2"
         logger.info(f"Fetching post flairs for subreddit: r/{subreddit}")
         response = self._get(url)
@@ -178,13 +166,12 @@ class RedditApp(APIApplication):
             ValueError: Raised when kind is invalid or when required parameters (text for self posts, url for link posts) are missing
 
         Tags:
-            create, post, social-media, reddit, api, important
-        """
+            create, post, social-media, reddit, api, important, destructiveHint"""
         if kind not in ["self", "link"]:
             raise ValueError("Invalid post kind. Must be one of 'self' or 'link'.")
-        if kind == "self" and not text:
+        if kind == "self" and (not text):
             raise ValueError("Text content is required for text posts.")
-        if kind == "link" and not url:
+        if kind == "link" and (not url):
             raise ValueError("URL is required for link posts (including images).")
         data = {
             "sr": subreddit,
@@ -202,7 +189,7 @@ class RedditApp(APIApplication):
         if (
             response_json
             and "json" in response_json
-            and "errors" in response_json["json"]
+            and ("errors" in response_json["json"])
         ):
             errors = response_json["json"]["errors"]
             if errors:
@@ -227,7 +214,7 @@ class RedditApp(APIApplication):
             JSONDecodeError: When the API response cannot be parsed as valid JSON
 
         Tags:
-            retrieve, get, reddit, comment, api, fetch, single-item, important
+            retrieve, get, reddit, comment, api, fetch, single-item, important, readOnlyHint
         """
         url = f"https://oauth.reddit.com/api/info.json?id={comment_id}"
         response = self._get(url)
@@ -254,13 +241,9 @@ class RedditApp(APIApplication):
             JSONDecodeError: If the API response cannot be parsed as JSON
 
         Tags:
-            post, comment, social, reddit, api, important
-        """
+            post, comment, social, reddit, api, important, destructiveHint"""
         url = f"{self.base_api_url}/api/comment"
-        data = {
-            "parent": parent_id,
-            "text": text,
-        }
+        data = {"parent": parent_id, "text": text}
         logger.info(f"Posting comment to {parent_id}")
         response = self._post(url, data=data)
         return response.json()
@@ -281,13 +264,9 @@ class RedditApp(APIApplication):
             ValueError: When invalid content_id format or empty text is provided
 
         Tags:
-            edit, update, content, reddit, api, important
-        """
+            edit, update, content, reddit, api, important, destructiveHint"""
         url = f"{self.base_api_url}/api/editusertext"
-        data = {
-            "thing_id": content_id,
-            "text": text,
-        }
+        data = {"thing_id": content_id, "text": text}
         logger.info(f"Editing content {content_id}")
         response = self._post(url, data=data)
         return response.json()
@@ -307,12 +286,9 @@ class RedditApp(APIApplication):
             RequestException: When there are network connectivity issues or API communication problems
 
         Tags:
-            delete, content-management, api, reddit, important
-        """
+            delete, content-management, api, reddit, important, destructiveHint"""
         url = f"{self.base_api_url}/api/del"
-        data = {
-            "id": content_id,
-        }
+        data = {"id": content_id}
         logger.info(f"Deleting content {content_id}")
         response = self._post(url, data=data)
         response.raise_for_status()
@@ -325,8 +301,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            users
-        """
+            users, readOnlyHint"""
         url = f"{self.base_url}/api/v1/me"
         query_params = {}
         response = self._get(url, params=query_params)
@@ -341,8 +316,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            account
-        """
+            account, readOnlyHint"""
         url = f"{self.base_url}/api/v1/me/karma"
         query_params = {}
         response = self._get(url, params=query_params)
@@ -357,15 +331,103 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            account
-        """
+            account, readOnlyHint"""
         url = f"{self.base_url}/api/v1/me/prefs"
         query_params = {}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def api_v1_me_prefs1(self, accept_pms=None, activity_relevant_ads=None, allow_clicktracking=None, bad_comment_autocollapse=None, beta=None, clickgadget=None, collapse_read_messages=None, compress=None, country_code=None, creddit_autorenew=None, default_comment_sort=None, domain_details=None, email_chat_request=None, email_comment_reply=None, email_community_discovery=None, email_digests=None, email_messages=None, email_new_user_welcome=None, email_post_reply=None, email_private_message=None, email_unsubscribe_all=None, email_upvote_comment=None, email_upvote_post=None, email_user_new_follower=None, email_username_mention=None, enable_default_themes=None, enable_followers=None, feed_recommendations_enabled=None, g=None, hide_ads=None, hide_downs=None, hide_from_robots=None, hide_ups=None, highlight_controversial=None, highlight_new_comments=None, ignore_suggested_sort=None, in_redesign_beta=None, label_nsfw=None, lang=None, legacy_search=None, live_bar_recommendations_enabled=None, live_orangereds=None, mark_messages_read=None, media=None, media_preview=None, min_comment_score=None, min_link_score=None, monitor_mentions=None, newwindow=None, nightmode=None, no_profanity=None, num_comments=None, numsites=None, organic=None, other_theme=None, over_18=None, private_feeds=None, profile_opt_out=None, public_votes=None, research=None, search_include_over_18=None, send_crosspost_messages=None, send_welcome_messages=None, show_flair=None, show_gold_expiration=None, show_link_flair=None, show_location_based_recommendations=None, show_presence=None, show_promote=None, show_stylesheets=None, show_trending=None, show_twitter=None, sms_notifications_enabled=None, store_visits=None, survey_last_seen_time=None, theme_selector=None, third_party_data_personalized_ads=None, third_party_personalized_ads=None, third_party_site_data_personalized_ads=None, third_party_site_data_personalized_content=None, threaded_messages=None, threaded_modmail=None, top_karma_subreddits=None, use_global_defaults=None, video_autoplay=None, whatsapp_comment_reply=None, whatsapp_enabled=None) -> Any:
+    def api_v1_me_prefs1(
+        self,
+        accept_pms=None,
+        activity_relevant_ads=None,
+        allow_clicktracking=None,
+        bad_comment_autocollapse=None,
+        beta=None,
+        clickgadget=None,
+        collapse_read_messages=None,
+        compress=None,
+        country_code=None,
+        creddit_autorenew=None,
+        default_comment_sort=None,
+        domain_details=None,
+        email_chat_request=None,
+        email_comment_reply=None,
+        email_community_discovery=None,
+        email_digests=None,
+        email_messages=None,
+        email_new_user_welcome=None,
+        email_post_reply=None,
+        email_private_message=None,
+        email_unsubscribe_all=None,
+        email_upvote_comment=None,
+        email_upvote_post=None,
+        email_user_new_follower=None,
+        email_username_mention=None,
+        enable_default_themes=None,
+        enable_followers=None,
+        feed_recommendations_enabled=None,
+        g=None,
+        hide_ads=None,
+        hide_downs=None,
+        hide_from_robots=None,
+        hide_ups=None,
+        highlight_controversial=None,
+        highlight_new_comments=None,
+        ignore_suggested_sort=None,
+        in_redesign_beta=None,
+        label_nsfw=None,
+        lang=None,
+        legacy_search=None,
+        live_bar_recommendations_enabled=None,
+        live_orangereds=None,
+        mark_messages_read=None,
+        media=None,
+        media_preview=None,
+        min_comment_score=None,
+        min_link_score=None,
+        monitor_mentions=None,
+        newwindow=None,
+        nightmode=None,
+        no_profanity=None,
+        num_comments=None,
+        numsites=None,
+        organic=None,
+        other_theme=None,
+        over_18=None,
+        private_feeds=None,
+        profile_opt_out=None,
+        public_votes=None,
+        research=None,
+        search_include_over_18=None,
+        send_crosspost_messages=None,
+        send_welcome_messages=None,
+        show_flair=None,
+        show_gold_expiration=None,
+        show_link_flair=None,
+        show_location_based_recommendations=None,
+        show_presence=None,
+        show_promote=None,
+        show_stylesheets=None,
+        show_trending=None,
+        show_twitter=None,
+        sms_notifications_enabled=None,
+        store_visits=None,
+        survey_last_seen_time=None,
+        theme_selector=None,
+        third_party_data_personalized_ads=None,
+        third_party_personalized_ads=None,
+        third_party_site_data_personalized_ads=None,
+        third_party_site_data_personalized_content=None,
+        threaded_messages=None,
+        threaded_modmail=None,
+        top_karma_subreddits=None,
+        use_global_defaults=None,
+        video_autoplay=None,
+        whatsapp_comment_reply=None,
+        whatsapp_enabled=None,
+    ) -> Any:
         """
         Update the current user's preferences.
 
@@ -554,96 +616,95 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            account
-        """
+            account, destructiveHint"""
         request_body = {
-            'accept_pms': accept_pms,
-            'activity_relevant_ads': activity_relevant_ads,
-            'allow_clicktracking': allow_clicktracking,
-            'bad_comment_autocollapse': bad_comment_autocollapse,
-            'beta': beta,
-            'clickgadget': clickgadget,
-            'collapse_read_messages': collapse_read_messages,
-            'compress': compress,
-            'country_code': country_code,
-            'creddit_autorenew': creddit_autorenew,
-            'default_comment_sort': default_comment_sort,
-            'domain_details': domain_details,
-            'email_chat_request': email_chat_request,
-            'email_comment_reply': email_comment_reply,
-            'email_community_discovery': email_community_discovery,
-            'email_digests': email_digests,
-            'email_messages': email_messages,
-            'email_new_user_welcome': email_new_user_welcome,
-            'email_post_reply': email_post_reply,
-            'email_private_message': email_private_message,
-            'email_unsubscribe_all': email_unsubscribe_all,
-            'email_upvote_comment': email_upvote_comment,
-            'email_upvote_post': email_upvote_post,
-            'email_user_new_follower': email_user_new_follower,
-            'email_username_mention': email_username_mention,
-            'enable_default_themes': enable_default_themes,
-            'enable_followers': enable_followers,
-            'feed_recommendations_enabled': feed_recommendations_enabled,
-            'g': g,
-            'hide_ads': hide_ads,
-            'hide_downs': hide_downs,
-            'hide_from_robots': hide_from_robots,
-            'hide_ups': hide_ups,
-            'highlight_controversial': highlight_controversial,
-            'highlight_new_comments': highlight_new_comments,
-            'ignore_suggested_sort': ignore_suggested_sort,
-            'in_redesign_beta': in_redesign_beta,
-            'label_nsfw': label_nsfw,
-            'lang': lang,
-            'legacy_search': legacy_search,
-            'live_bar_recommendations_enabled': live_bar_recommendations_enabled,
-            'live_orangereds': live_orangereds,
-            'mark_messages_read': mark_messages_read,
-            'media': media,
-            'media_preview': media_preview,
-            'min_comment_score': min_comment_score,
-            'min_link_score': min_link_score,
-            'monitor_mentions': monitor_mentions,
-            'newwindow': newwindow,
-            'nightmode': nightmode,
-            'no_profanity': no_profanity,
-            'num_comments': num_comments,
-            'numsites': numsites,
-            'organic': organic,
-            'other_theme': other_theme,
-            'over_18': over_18,
-            'private_feeds': private_feeds,
-            'profile_opt_out': profile_opt_out,
-            'public_votes': public_votes,
-            'research': research,
-            'search_include_over_18': search_include_over_18,
-            'send_crosspost_messages': send_crosspost_messages,
-            'send_welcome_messages': send_welcome_messages,
-            'show_flair': show_flair,
-            'show_gold_expiration': show_gold_expiration,
-            'show_link_flair': show_link_flair,
-            'show_location_based_recommendations': show_location_based_recommendations,
-            'show_presence': show_presence,
-            'show_promote': show_promote,
-            'show_stylesheets': show_stylesheets,
-            'show_trending': show_trending,
-            'show_twitter': show_twitter,
-            'sms_notifications_enabled': sms_notifications_enabled,
-            'store_visits': store_visits,
-            'survey_last_seen_time': survey_last_seen_time,
-            'theme_selector': theme_selector,
-            'third_party_data_personalized_ads': third_party_data_personalized_ads,
-            'third_party_personalized_ads': third_party_personalized_ads,
-            'third_party_site_data_personalized_ads': third_party_site_data_personalized_ads,
-            'third_party_site_data_personalized_content': third_party_site_data_personalized_content,
-            'threaded_messages': threaded_messages,
-            'threaded_modmail': threaded_modmail,
-            'top_karma_subreddits': top_karma_subreddits,
-            'use_global_defaults': use_global_defaults,
-            'video_autoplay': video_autoplay,
-            'whatsapp_comment_reply': whatsapp_comment_reply,
-            'whatsapp_enabled': whatsapp_enabled,
+            "accept_pms": accept_pms,
+            "activity_relevant_ads": activity_relevant_ads,
+            "allow_clicktracking": allow_clicktracking,
+            "bad_comment_autocollapse": bad_comment_autocollapse,
+            "beta": beta,
+            "clickgadget": clickgadget,
+            "collapse_read_messages": collapse_read_messages,
+            "compress": compress,
+            "country_code": country_code,
+            "creddit_autorenew": creddit_autorenew,
+            "default_comment_sort": default_comment_sort,
+            "domain_details": domain_details,
+            "email_chat_request": email_chat_request,
+            "email_comment_reply": email_comment_reply,
+            "email_community_discovery": email_community_discovery,
+            "email_digests": email_digests,
+            "email_messages": email_messages,
+            "email_new_user_welcome": email_new_user_welcome,
+            "email_post_reply": email_post_reply,
+            "email_private_message": email_private_message,
+            "email_unsubscribe_all": email_unsubscribe_all,
+            "email_upvote_comment": email_upvote_comment,
+            "email_upvote_post": email_upvote_post,
+            "email_user_new_follower": email_user_new_follower,
+            "email_username_mention": email_username_mention,
+            "enable_default_themes": enable_default_themes,
+            "enable_followers": enable_followers,
+            "feed_recommendations_enabled": feed_recommendations_enabled,
+            "g": g,
+            "hide_ads": hide_ads,
+            "hide_downs": hide_downs,
+            "hide_from_robots": hide_from_robots,
+            "hide_ups": hide_ups,
+            "highlight_controversial": highlight_controversial,
+            "highlight_new_comments": highlight_new_comments,
+            "ignore_suggested_sort": ignore_suggested_sort,
+            "in_redesign_beta": in_redesign_beta,
+            "label_nsfw": label_nsfw,
+            "lang": lang,
+            "legacy_search": legacy_search,
+            "live_bar_recommendations_enabled": live_bar_recommendations_enabled,
+            "live_orangereds": live_orangereds,
+            "mark_messages_read": mark_messages_read,
+            "media": media,
+            "media_preview": media_preview,
+            "min_comment_score": min_comment_score,
+            "min_link_score": min_link_score,
+            "monitor_mentions": monitor_mentions,
+            "newwindow": newwindow,
+            "nightmode": nightmode,
+            "no_profanity": no_profanity,
+            "num_comments": num_comments,
+            "numsites": numsites,
+            "organic": organic,
+            "other_theme": other_theme,
+            "over_18": over_18,
+            "private_feeds": private_feeds,
+            "profile_opt_out": profile_opt_out,
+            "public_votes": public_votes,
+            "research": research,
+            "search_include_over_18": search_include_over_18,
+            "send_crosspost_messages": send_crosspost_messages,
+            "send_welcome_messages": send_welcome_messages,
+            "show_flair": show_flair,
+            "show_gold_expiration": show_gold_expiration,
+            "show_link_flair": show_link_flair,
+            "show_location_based_recommendations": show_location_based_recommendations,
+            "show_presence": show_presence,
+            "show_promote": show_promote,
+            "show_stylesheets": show_stylesheets,
+            "show_trending": show_trending,
+            "show_twitter": show_twitter,
+            "sms_notifications_enabled": sms_notifications_enabled,
+            "store_visits": store_visits,
+            "survey_last_seen_time": survey_last_seen_time,
+            "theme_selector": theme_selector,
+            "third_party_data_personalized_ads": third_party_data_personalized_ads,
+            "third_party_personalized_ads": third_party_personalized_ads,
+            "third_party_site_data_personalized_ads": third_party_site_data_personalized_ads,
+            "third_party_site_data_personalized_content": third_party_site_data_personalized_content,
+            "threaded_messages": threaded_messages,
+            "threaded_modmail": threaded_modmail,
+            "top_karma_subreddits": top_karma_subreddits,
+            "use_global_defaults": use_global_defaults,
+            "video_autoplay": video_autoplay,
+            "whatsapp_comment_reply": whatsapp_comment_reply,
+            "whatsapp_enabled": whatsapp_enabled,
         }
         request_body = {k: v for k, v in request_body.items() if v is not None}
         url = f"{self.base_url}/api/v1/me/prefs"
@@ -660,15 +721,16 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            account
-        """
+            account, readOnlyHint"""
         url = f"{self.base_url}/api/v1/me/trophies"
         query_params = {}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def prefs_friends(self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def prefs_friends(
+        self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None
+    ) -> Any:
         """
         Get the current user's friends.
 
@@ -684,15 +746,27 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            account
-        """
+            account, readOnlyHint"""
         url = f"{self.base_url}/prefs/friends"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def prefs_blocked(self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def prefs_blocked(
+        self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None
+    ) -> Any:
         """
         Get the current user's blocked users.
 
@@ -708,15 +782,27 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            account
-        """
+            account, readOnlyHint"""
         url = f"{self.base_url}/prefs/blocked"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def prefs_messaging(self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def prefs_messaging(
+        self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None
+    ) -> Any:
         """
         Get the current user's messaging preferences.
 
@@ -732,15 +818,27 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            account
-        """
+            account, readOnlyHint"""
         url = f"{self.base_url}/prefs/messaging"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def prefs_trusted(self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def prefs_trusted(
+        self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None
+    ) -> Any:
         """
         Get the current user's trusted users.
 
@@ -756,10 +854,20 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            account
-        """
+            account, readOnlyHint"""
         url = f"{self.base_url}/prefs/trusted"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -772,15 +880,16 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            captcha
-        """
+            captcha, readOnlyHint"""
         url = f"{self.base_url}/api/needs_captcha"
         query_params = {}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def api_v1_collections_collection(self, collection_id=None, include_links=None) -> Any:
+    def api_v1_collections_collection(
+        self, collection_id=None, include_links=None
+    ) -> Any:
         """
         Get a collection by ID.
 
@@ -792,10 +901,16 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            collections
-        """
+            collections, readOnlyHint"""
         url = f"{self.base_url}/api/v1/collections/collection"
-        query_params = {k: v for k, v in [('collection_id', collection_id), ('include_links', include_links)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("collection_id", collection_id),
+                ("include_links", include_links),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -808,8 +923,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            collections
-        """
+            collections, readOnlyHint"""
         url = f"{self.base_url}/api/v1/collections/subreddit_collections"
         query_params = {}
         response = self._get(url, params=query_params)
@@ -828,8 +942,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            emoji
-        """
+            emoji, destructiveHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         if emoji_name is None:
@@ -851,8 +964,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            emoji
-        """
+            emoji, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/api/v1/{subreddit}/emojis/all"
@@ -872,8 +984,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            flair
-        """
+            flair, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/api/flair"
@@ -882,8 +993,17 @@ class RedditApp(APIApplication):
         response.raise_for_status()
         return response.json()
 
-
-    def r_subreddit_api_flairlist(self, subreddit, after=None, before=None, count=None, limit=None, name=None, show=None, sr_detail=None) -> Any:
+    def r_subreddit_api_flairlist(
+        self,
+        subreddit,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        name=None,
+        show=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get the current user's flair list for a subreddit.
 
@@ -901,12 +1021,23 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            flair
-        """
+            flair, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/api/flairlist"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('name', name), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("name", name),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -922,8 +1053,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            flair
-        """
+            flair, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/api/link_flair"
@@ -943,8 +1073,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            flair
-        """
+            flair, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/api/link_flair_v2"
@@ -964,8 +1093,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            flair
-        """
+            flair, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/api/user_flair"
@@ -985,8 +1113,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            flair
-        """
+            flair, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/api/user_flair_v2"
@@ -1008,10 +1135,13 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            links & comments
-        """
+            links & comments, readOnlyHint"""
         url = f"{self.base_url}/api/info"
-        query_params = {k: v for k, v in [('id', id), ('sr_name', sr_name), ('url', url)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [("id", id), ("sr_name", sr_name), ("url", url)]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -1030,17 +1160,29 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            links & comments
-        """ 
+            links & comments, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/{subreddit}/api/info"
-        query_params = {k: v for k, v in [('id', id), ('sr_name', sr_name), ('url', url)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [("id", id), ("sr_name", sr_name), ("url", url)]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def api_morechildren(self, api_type=None, children=None, depth=None, id=None, limit_children=None, link_id=None, sort=None) -> Any:
+    def api_morechildren(
+        self,
+        api_type=None,
+        children=None,
+        depth=None,
+        id=None,
+        limit_children=None,
+        link_id=None,
+        sort=None,
+    ) -> Any:
         """
         Get more children for a link or comment.
 
@@ -1057,10 +1199,21 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            links & comments
-        """
+            links & comments, readOnlyHint"""
         url = f"{self.base_url}/api/morechildren"
-        query_params = {k: v for k, v in [('api_type', api_type), ('children', children), ('depth', depth), ('id', id), ('limit_children', limit_children), ('link_id', link_id), ('sort', sort)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("api_type", api_type),
+                ("children", children),
+                ("depth", depth),
+                ("id", id),
+                ("limit_children", limit_children),
+                ("link_id", link_id),
+                ("sort", sort),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -1073,8 +1226,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            links & comments
-        """
+            links & comments, readOnlyHint"""
         url = f"{self.base_url}/api/saved_categories"
         query_params = {}
         response = self._get(url, params=query_params)
@@ -1089,15 +1241,16 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            listings
-        """
+            listings, readOnlyHint"""
         url = f"{self.base_url}/req"
         query_params = {}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def best(self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def best(
+        self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None
+    ) -> Any:
         """
         Get the best posts.
 
@@ -1113,10 +1266,20 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            listings
-        """
+            listings, readOnlyHint"""
         url = f"{self.base_url}/best"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -1132,8 +1295,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            listings
-        """
+            listings, readOnlyHint"""
         if names is None:
             raise ValueError("Missing required parameter 'names'")
         url = f"{self.base_url}/by_id/{names}"
@@ -1142,7 +1304,23 @@ class RedditApp(APIApplication):
         response.raise_for_status()
         return response.json()
 
-    def comments_article(self, article, comment=None, context=None, depth=None, limit=None, showedits=None, showmedia=None, showmore=None, showtitle=None, sort=None, sr_detail=None, theme=None, threaded=None, truncate=None) -> Any:
+    def comments_article(
+        self,
+        article,
+        comment=None,
+        context=None,
+        depth=None,
+        limit=None,
+        showedits=None,
+        showmedia=None,
+        showmore=None,
+        showtitle=None,
+        sort=None,
+        sr_detail=None,
+        theme=None,
+        threaded=None,
+        truncate=None,
+    ) -> Any:
         """
         Get comments for a post.
 
@@ -1166,12 +1344,29 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            listings
-        """
+            listings, readOnlyHint"""
         if article is None:
             raise ValueError("Missing required parameter 'article'")
         url = f"{self.base_url}/comments/{article}"
-        query_params = {k: v for k, v in [('comment', comment), ('context', context), ('depth', depth), ('limit', limit), ('showedits', showedits), ('showmedia', showmedia), ('showmore', showmore), ('showtitle', showtitle), ('sort', sort), ('sr_detail', sr_detail), ('theme', theme), ('threaded', threaded), ('truncate', truncate)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("comment", comment),
+                ("context", context),
+                ("depth", depth),
+                ("limit", limit),
+                ("showedits", showedits),
+                ("showmedia", showmedia),
+                ("showmore", showmore),
+                ("showtitle", showtitle),
+                ("sort", sort),
+                ("sr_detail", sr_detail),
+                ("theme", theme),
+                ("threaded", threaded),
+                ("truncate", truncate),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -1187,18 +1382,15 @@ class RedditApp(APIApplication):
             Any: API response data containing post details and comments.
 
         Tags:
-            listings, comments, posts, important
-        """
-        
-        
+            listings, comments, posts, important, readOnlyHint"""
         url = f"{self.base_url}/comments/{post_id}.json"
         query_params = {}
         response = self._get(url, params=query_params)
         return self._handle_response(response)
 
-
-
-    def controversial(self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def controversial(
+        self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None
+    ) -> Any:
         """
         Get the most controversial posts.
 
@@ -1214,15 +1406,37 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            listings
-        """
+            listings, readOnlyHint"""
         url = f"{self.base_url}/controversial"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def duplicates_article(self, article, after=None, before=None, count=None, crossposts_only=None, limit=None, show=None, sort=None, sr=None, sr_detail=None) -> Any:
+    def duplicates_article(
+        self,
+        article,
+        after=None,
+        before=None,
+        count=None,
+        crossposts_only=None,
+        limit=None,
+        show=None,
+        sort=None,
+        sr=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get duplicate posts.
 
@@ -1242,17 +1456,39 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            listings
-        """
+            listings, readOnlyHint"""
         if article is None:
             raise ValueError("Missing required parameter 'article'")
         url = f"{self.base_url}/duplicates/{article}"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('crossposts_only', crossposts_only), ('limit', limit), ('show', show), ('sort', sort), ('sr', sr), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("crossposts_only", crossposts_only),
+                ("limit", limit),
+                ("show", show),
+                ("sort", sort),
+                ("sr", sr),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def hot(self, g=None, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def hot(
+        self,
+        g=None,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        show=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get the hottest posts.
 
@@ -1269,15 +1505,28 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            listings
-        """
+            listings, readOnlyHint"""
         url = f"{self.base_url}/hot"
-        query_params = {k: v for k, v in [('g', g), ('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("g", g),
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def new(self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def new(
+        self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None
+    ) -> Any:
         """
         Get the newest posts.
 
@@ -1293,15 +1542,42 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            listings
-        """
+            listings, readOnlyHint"""
         url = f"{self.base_url}/new"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_comments_article(self, subreddit, article, comment=None, context=None, depth=None, limit=None, showedits=None, showmedia=None, showmore=None, showtitle=None, sort=None, sr_detail=None, theme=None, threaded=None, truncate=None) -> Any:
+    def r_subreddit_comments_article(
+        self,
+        subreddit,
+        article,
+        comment=None,
+        context=None,
+        depth=None,
+        limit=None,
+        showedits=None,
+        showmedia=None,
+        showmore=None,
+        showtitle=None,
+        sort=None,
+        sr_detail=None,
+        theme=None,
+        threaded=None,
+        truncate=None,
+    ) -> Any:
         """
         Get comments for a post in a subreddit.
 
@@ -1326,19 +1602,45 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            listings
-        """
+            listings, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         if article is None:
             raise ValueError("Missing required parameter 'article'")
         url = f"{self.base_url}/r/{subreddit}/comments/{article}"
-        query_params = {k: v for k, v in [('comment', comment), ('context', context), ('depth', depth), ('limit', limit), ('showedits', showedits), ('showmedia', showmedia), ('showmore', showmore), ('showtitle', showtitle), ('sort', sort), ('sr_detail', sr_detail), ('theme', theme), ('threaded', threaded), ('truncate', truncate)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("comment", comment),
+                ("context", context),
+                ("depth", depth),
+                ("limit", limit),
+                ("showedits", showedits),
+                ("showmedia", showmedia),
+                ("showmore", showmore),
+                ("showtitle", showtitle),
+                ("sort", sort),
+                ("sr_detail", sr_detail),
+                ("theme", theme),
+                ("threaded", threaded),
+                ("truncate", truncate),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_controversial(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def r_subreddit_controversial(
+        self,
+        subreddit,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        show=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get the most controversial posts in a subreddit.
 
@@ -1355,17 +1657,37 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            listings
-        """
+            listings, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/controversial"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_hot(self, subreddit, g=None, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def r_subreddit_hot(
+        self,
+        subreddit,
+        g=None,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        show=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get the hottest posts in a subreddit.
 
@@ -1383,17 +1705,37 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            listings
-        """
+            listings, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/hot"
-        query_params = {k: v for k, v in [('g', g), ('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("g", g),
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_new(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def r_subreddit_new(
+        self,
+        subreddit,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        show=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get the newest posts in a subreddit.
 
@@ -1410,17 +1752,36 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            listings
-        """
+            listings, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/new"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_random(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def r_subreddit_random(
+        self,
+        subreddit,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        show=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get a random post in a subreddit.
 
@@ -1437,17 +1798,36 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            listings
-        """
+            listings, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/random"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_rising(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def r_subreddit_rising(
+        self,
+        subreddit,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        show=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get the rising posts in a subreddit.
 
@@ -1464,17 +1844,36 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            listings
-        """
+            listings, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/rising"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_top(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def r_subreddit_top(
+        self,
+        subreddit,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        show=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get the top posts in a subreddit.
 
@@ -1491,17 +1890,29 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            listings
-        """
+            listings, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/top"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def random(self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def random(
+        self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None
+    ) -> Any:
         """
         Get a random post.
 
@@ -1517,15 +1928,27 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            listings
-        """
+            listings, readOnlyHint"""
         url = f"{self.base_url}/random"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def rising(self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def rising(
+        self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None
+    ) -> Any:
         """
         Get the rising posts.
 
@@ -1541,15 +1964,27 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            listings
-        """
+            listings, readOnlyHint"""
         url = f"{self.base_url}/rising"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def top(self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def top(
+        self, after=None, before=None, count=None, limit=None, show=None, sr_detail=None
+    ) -> Any:
         """
         Get the top posts.
 
@@ -1565,10 +2000,20 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            listings
-        """
+            listings, readOnlyHint"""
         url = f"{self.base_url}/top"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -1584,10 +2029,9 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            misc
-        """
+            misc, readOnlyHint"""
         url = f"{self.base_url}/api/saved_media_text"
-        query_params = {k: v for k, v in [('url', url)] if v is not None}
+        query_params = {k: v for k, v in [("url", url)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -1603,10 +2047,9 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            misc
-        """
+            misc, readOnlyHint"""
         url = f"{self.base_url}/api/v1/scopes"
-        query_params = {k: v for k, v in [('scopes', scopes)] if v is not None}
+        query_params = {k: v for k, v in [("scopes", scopes)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -1623,17 +2066,27 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            misc
-        """
+            misc, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/api/saved_media_text"
-        query_params = {k: v for k, v in [('url', url)] if v is not None}
+        query_params = {k: v for k, v in [("url", url)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_about_log(self, subreddit, after=None, before=None, count=None, limit=None, mod=None, show=None, sr_detail=None, type=None) -> Any:
+    def r_subreddit_about_log(
+        self,
+        subreddit,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        mod=None,
+        show=None,
+        sr_detail=None,
+        type=None,
+    ) -> Any:
         """
         Get the log of a subreddit.
 
@@ -1652,17 +2105,40 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            moderation
-        """
+            moderation, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/about/log"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('mod', mod), ('show', show), ('sr_detail', sr_detail), ('type', type)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("mod", mod),
+                ("show", show),
+                ("sr_detail", sr_detail),
+                ("type", type),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_about_edited(self, subreddit, after=None, before=None, count=None, limit=None, location=None, only=None, show=None, sr_detail=None) -> Any:
+    def r_subreddit_about_edited(
+        self,
+        subreddit,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        location=None,
+        only=None,
+        show=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get the edited posts in a subreddit.
 
@@ -1681,17 +2157,40 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            moderation
-        """
+            moderation, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/about/edited"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('location', location), ('only', only), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("location", location),
+                ("only", only),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_about_modqueue(self, subreddit, after=None, before=None, count=None, limit=None, location=None, only=None, show=None, sr_detail=None) -> Any:
+    def r_subreddit_about_modqueue(
+        self,
+        subreddit,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        location=None,
+        only=None,
+        show=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get the modqueue in a subreddit.
 
@@ -1710,17 +2209,40 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            moderation
-        """
+            moderation, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/about/modqueue"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('location', location), ('only', only), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("location", location),
+                ("only", only),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_about_reports(self, subreddit, after=None, before=None, count=None, limit=None, location=None, only=None, show=None, sr_detail=None) -> Any:
+    def r_subreddit_about_reports(
+        self,
+        subreddit,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        location=None,
+        only=None,
+        show=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get the reports in a subreddit.
 
@@ -1739,17 +2261,40 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            moderation
-        """
+            moderation, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/about/reports"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('location', location), ('only', only), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("location", location),
+                ("only", only),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_about_spam(self, subreddit, after=None, before=None, count=None, limit=None, location=None, only=None, show=None, sr_detail=None) -> Any:
+    def r_subreddit_about_spam(
+        self,
+        subreddit,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        location=None,
+        only=None,
+        show=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get the spam posts in a subreddit.
 
@@ -1768,17 +2313,40 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            moderation
-        """
+            moderation, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/about/spam"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('location', location), ('only', only), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("location", location),
+                ("only", only),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_about_unmoderated(self, subreddit, after=None, before=None, count=None, limit=None, location=None, only=None, show=None, sr_detail=None) -> Any:
+    def r_subreddit_about_unmoderated(
+        self,
+        subreddit,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        location=None,
+        only=None,
+        show=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get the unmoderated posts in a subreddit.
 
@@ -1797,12 +2365,24 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            moderation
-        """
+            moderation, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/about/unmoderated"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('location', location), ('only', only), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("location", location),
+                ("only", only),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -1818,8 +2398,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            moderation
-        """
+            moderation, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/stylesheet"
@@ -1836,15 +2415,16 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            moderation
-        """
+            moderation, readOnlyHint"""
         url = f"{self.base_url}/stylesheet"
         query_params = {}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def api_mod_notes1(self, before=None, filter=None, limit=None, subreddit=None, user=None) -> Any:
+    def api_mod_notes1(
+        self, before=None, filter=None, limit=None, subreddit=None, user=None
+    ) -> Any:
         """
         Get the mod notes of a subreddit.
 
@@ -1859,10 +2439,19 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            modnote
-        """
+            modnote, readOnlyHint"""
         url = f"{self.base_url}/api/mod/notes"
-        query_params = {k: v for k, v in [('before', before), ('filter', filter), ('limit', limit), ('subreddit', subreddit), ('user', user)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("before", before),
+                ("filter", filter),
+                ("limit", limit),
+                ("subreddit", subreddit),
+                ("user", user),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -1880,15 +2469,20 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            modnote
-        """
+            modnote, destructiveHint"""
         url = f"{self.base_url}/api/mod/notes"
-        query_params = {k: v for k, v in [('note_id', note_id), ('subreddit', subreddit), ('user', user)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [("note_id", note_id), ("subreddit", subreddit), ("user", user)]
+            if v is not None
+        }
         response = self._delete(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def api_mod_notes_recent(self, before=None, filter=None, limit=None, subreddits=None, user=None) -> Any:
+    def api_mod_notes_recent(
+        self, before=None, filter=None, limit=None, subreddits=None, user=None
+    ) -> Any:
         """
         Get the recent mod notes.
 
@@ -1903,10 +2497,19 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            modnote
-        """
+            modnote, readOnlyHint"""
         url = f"{self.base_url}/api/mod/notes/recent"
-        query_params = {k: v for k, v in [('before', before), ('filter', filter), ('limit', limit), ('subreddits', subreddits), ('user', user)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("before", before),
+                ("filter", filter),
+                ("limit", limit),
+                ("subreddits", subreddits),
+                ("user", user),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -1922,10 +2525,9 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            multis
-        """
+            multis, readOnlyHint"""
         url = f"{self.base_url}/api/multi/mine"
-        query_params = {k: v for k, v in [('expand_srs', expand_srs)] if v is not None}
+        query_params = {k: v for k, v in [("expand_srs", expand_srs)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -1942,12 +2544,11 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            multis
-        """
+            multis, readOnlyHint"""
         if username is None:
             raise ValueError("Missing required parameter 'username'")
         url = f"{self.base_url}/api/multi/user/{username}"
-        query_params = {k: v for k, v in [('expand_srs', expand_srs)] if v is not None}
+        query_params = {k: v for k, v in [("expand_srs", expand_srs)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -1964,12 +2565,11 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            multis
-        """
+            multis, readOnlyHint"""
         if multipath is None:
             raise ValueError("Missing required parameter 'multipath'")
         url = f"{self.base_url}/api/multi/{multipath}"
-        query_params = {k: v for k, v in [('expand_srs', expand_srs)] if v is not None}
+        query_params = {k: v for k, v in [("expand_srs", expand_srs)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -1986,12 +2586,11 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            multis
-        """
+            multis, destructiveHint"""
         if multipath is None:
             raise ValueError("Missing required parameter 'multipath'")
         url = f"{self.base_url}/api/multi/{multipath}"
-        query_params = {k: v for k, v in [('expand_srs', expand_srs)] if v is not None}
+        query_params = {k: v for k, v in [("expand_srs", expand_srs)] if v is not None}
         response = self._delete(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -2007,8 +2606,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            multis
-        """
+            multis, readOnlyHint"""
         if multipath is None:
             raise ValueError("Missing required parameter 'multipath'")
         url = f"{self.base_url}/api/multi/{multipath}/description"
@@ -2029,8 +2627,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            multis
-        """
+            multis, readOnlyHint"""
         if multipath is None:
             raise ValueError("Missing required parameter 'multipath'")
         if subreddit is None:
@@ -2053,8 +2650,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            multis
-        """
+            multis, destructiveHint"""
         if multipath is None:
             raise ValueError("Missing required parameter 'multipath'")
         if subreddit is None:
@@ -2065,7 +2661,9 @@ class RedditApp(APIApplication):
         response.raise_for_status()
         return response.json()
 
-    def api_mod_conversations(self, after=None, entity=None, limit=None, sort=None, state=None) -> Any:
+    def api_mod_conversations(
+        self, after=None, entity=None, limit=None, sort=None, state=None
+    ) -> Any:
         """
         Get the mod conversations.
 
@@ -2080,15 +2678,26 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            new modmail
-        """
+            new modmail, readOnlyHint"""
         url = f"{self.base_url}/api/mod/conversations"
-        query_params = {k: v for k, v in [('after', after), ('entity', entity), ('limit', limit), ('sort', sort), ('state', state)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("entity", entity),
+                ("limit", limit),
+                ("sort", sort),
+                ("state", state),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def api_mod_conversations_conversation_id(self, conversation_id, markRead=None) -> Any:
+    def api_mod_conversations_conversation_id(
+        self, conversation_id, markRead=None
+    ) -> Any:
         """
         Get a mod conversation.
 
@@ -2100,12 +2709,11 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            new modmail
-        """
+            new modmail, destructiveHint"""
         if conversation_id is None:
             raise ValueError("Missing required parameter 'conversation_id'")
         url = f"{self.base_url}/api/mod/conversations/{conversation_id}"
-        query_params = {k: v for k, v in [('markRead', markRead)] if v is not None}
+        query_params = {k: v for k, v in [("markRead", markRead)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -2121,8 +2729,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            new modmail
-        """
+            new modmail, destructiveHint"""
         if conversation_id is None:
             raise ValueError("Missing required parameter 'conversation_id'")
         url = f"{self.base_url}/api/mod/conversations/{conversation_id}/highlight"
@@ -2142,8 +2749,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            new modmail
-        """
+            new modmail, destructiveHint"""
         if conversation_id is None:
             raise ValueError("Missing required parameter 'conversation_id'")
         url = f"{self.base_url}/api/mod/conversations/{conversation_id}/unarchive"
@@ -2163,8 +2769,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            new modmail
-        """
+            new modmail, destructiveHint"""
         if conversation_id is None:
             raise ValueError("Missing required parameter 'conversation_id'")
         url = f"{self.base_url}/api/mod/conversations/{conversation_id}/unban"
@@ -2184,8 +2789,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            new modmail
-        """
+            new modmail, destructiveHint"""
         if conversation_id is None:
             raise ValueError("Missing required parameter 'conversation_id'")
         url = f"{self.base_url}/api/mod/conversations/{conversation_id}/unmute"
@@ -2205,8 +2809,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            new modmail
-        """
+            new modmail, readOnlyHint"""
         if conversation_id is None:
             raise ValueError("Missing required parameter 'conversation_id'")
         url = f"{self.base_url}/api/mod/conversations/{conversation_id}/user"
@@ -2223,8 +2826,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            new modmail
-        """
+            new modmail, readOnlyHint"""
         url = f"{self.base_url}/api/mod/conversations/subreddits"
         query_params = {}
         response = self._get(url, params=query_params)
@@ -2239,15 +2841,24 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            new modmail
-        """
+            new modmail, readOnlyHint"""
         url = f"{self.base_url}/api/mod/conversations/unread/count"
         query_params = {}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def message_inbox(self, mark=None, mid=None, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def message_inbox(
+        self,
+        mark=None,
+        mid=None,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        show=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get the current user's inbox.
 
@@ -2265,15 +2876,37 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            private messages
-        """
+            private messages, readOnlyHint"""
         url = f"{self.base_url}/message/inbox"
-        query_params = {k: v for k, v in [('mark', mark), ('mid', mid), ('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("mark", mark),
+                ("mid", mid),
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def message_sent(self, mark=None, mid=None, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def message_sent(
+        self,
+        mark=None,
+        mid=None,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        show=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get the current user's sent messages.
 
@@ -2291,15 +2924,37 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            private messages
-        """
+            private messages, readOnlyHint"""
         url = f"{self.base_url}/message/sent"
-        query_params = {k: v for k, v in [('mark', mark), ('mid', mid), ('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("mark", mark),
+                ("mid", mid),
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def message_unread(self, mark=None, mid=None, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def message_unread(
+        self,
+        mark=None,
+        mid=None,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        show=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get the current user's unread messages.
 
@@ -2317,15 +2972,42 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            private messages
-        """
+            private messages, readOnlyHint"""
         url = f"{self.base_url}/message/unread"
-        query_params = {k: v for k, v in [('mark', mark), ('mid', mid), ('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("mark", mark),
+                ("mid", mid),
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def search(self, after=None, before=None, category=None, count=None, include_facets=None, limit=None, q=None, restrict_sr=None, show=None, sort=None, sr_detail=None, t=None, type=None) -> Any:
+    def search(
+        self,
+        after=None,
+        before=None,
+        category=None,
+        count=None,
+        include_facets=None,
+        limit=None,
+        q=None,
+        restrict_sr=None,
+        show=None,
+        sort=None,
+        sr_detail=None,
+        t=None,
+        type=None,
+    ) -> Any:
         """
         Search for posts, comments, and users.
 
@@ -2348,15 +3030,48 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            search
-        """
+            search, readOnlyHint"""
         url = f"{self.base_url}/search"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('category', category), ('count', count), ('include_facets', include_facets), ('limit', limit), ('q', q), ('restrict_sr', restrict_sr), ('show', show), ('sort', sort), ('sr_detail', sr_detail), ('t', t), ('type', type)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("category", category),
+                ("count", count),
+                ("include_facets", include_facets),
+                ("limit", limit),
+                ("q", q),
+                ("restrict_sr", restrict_sr),
+                ("show", show),
+                ("sort", sort),
+                ("sr_detail", sr_detail),
+                ("t", t),
+                ("type", type),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_search(self, subreddit, after=None, before=None, category=None, count=None, include_facets=None, limit=None, q=None, restrict_sr=None, show=None, sort=None, sr_detail=None, t=None, type=None) -> Any:
+    def r_subreddit_search(
+        self,
+        subreddit,
+        after=None,
+        before=None,
+        category=None,
+        count=None,
+        include_facets=None,
+        limit=None,
+        q=None,
+        restrict_sr=None,
+        show=None,
+        sort=None,
+        sr_detail=None,
+        t=None,
+        type=None,
+    ) -> Any:
         """
         Search for posts, comments, and users in a subreddit.
 
@@ -2380,18 +3095,42 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            search
-        """
+            search, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/search"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('category', category), ('count', count), ('include_facets', include_facets), ('limit', limit), ('q', q), ('restrict_sr', restrict_sr), ('show', show), ('sort', sort), ('sr_detail', sr_detail), ('t', t), ('type', type)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("category", category),
+                ("count", count),
+                ("include_facets", include_facets),
+                ("limit", limit),
+                ("q", q),
+                ("restrict_sr", restrict_sr),
+                ("show", show),
+                ("sort", sort),
+                ("sr_detail", sr_detail),
+                ("t", t),
+                ("type", type),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-
-    def api_search_reddit_names(self, exact=None, include_over_18=None, include_unadvertisable=None, query=None, search_query_id=None, typeahead_active=None) -> Any:
+    def api_search_reddit_names(
+        self,
+        exact=None,
+        include_over_18=None,
+        include_unadvertisable=None,
+        query=None,
+        search_query_id=None,
+        typeahead_active=None,
+    ) -> Any:
         """
         Search for subreddits.
 
@@ -2407,15 +3146,27 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            subreddits
-        """
+            subreddits, readOnlyHint"""
         url = f"{self.base_url}/api/search_reddit_names"
-        query_params = {k: v for k, v in [('exact', exact), ('include_over_18', include_over_18), ('include_unadvertisable', include_unadvertisable), ('query', query), ('search_query_id', search_query_id), ('typeahead_active', typeahead_active)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("exact", exact),
+                ("include_over_18", include_over_18),
+                ("include_unadvertisable", include_unadvertisable),
+                ("query", query),
+                ("search_query_id", search_query_id),
+                ("typeahead_active", typeahead_active),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def api_subreddit_autocomplete(self, include_over_18=None, include_profiles=None, query=None) -> Any:
+    def api_subreddit_autocomplete(
+        self, include_over_18=None, include_profiles=None, query=None
+    ) -> Any:
         """
         Search for subreddits.
 
@@ -2428,15 +3179,30 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            subreddits
-        """
+            subreddits, readOnlyHint"""
         url = f"{self.base_url}/api/subreddit_autocomplete"
-        query_params = {k: v for k, v in [('include_over_18', include_over_18), ('include_profiles', include_profiles), ('query', query)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("include_over_18", include_over_18),
+                ("include_profiles", include_profiles),
+                ("query", query),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def api_subreddit_autocomplete_v2(self, include_over_18=None, include_profiles=None, limit=None, query=None, search_query_id=None, typeahead_active=None) -> Any:
+    def api_subreddit_autocomplete_v2(
+        self,
+        include_over_18=None,
+        include_profiles=None,
+        limit=None,
+        query=None,
+        search_query_id=None,
+        typeahead_active=None,
+    ) -> Any:
         """
         Search for subreddits.
 
@@ -2452,10 +3218,20 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            subreddits
-        """
+            subreddits, readOnlyHint"""
         url = f"{self.base_url}/api/subreddit_autocomplete_v2"
-        query_params = {k: v for k, v in [('include_over_18', include_over_18), ('include_profiles', include_profiles), ('limit', limit), ('query', query), ('search_query_id', search_query_id), ('typeahead_active', typeahead_active)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("include_over_18", include_over_18),
+                ("include_profiles", include_profiles),
+                ("limit", limit),
+                ("query", query),
+                ("search_query_id", search_query_id),
+                ("typeahead_active", typeahead_active),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -2471,8 +3247,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            subreddits
-        """
+            subreddits, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/api/v1/{subreddit}/post_requirements"
@@ -2481,7 +3256,17 @@ class RedditApp(APIApplication):
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_about_banned(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None, user=None) -> Any:
+    def r_subreddit_about_banned(
+        self,
+        subreddit,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        show=None,
+        sr_detail=None,
+        user=None,
+    ) -> Any:
         """
         Get the banned users in a subreddit.
 
@@ -2499,12 +3284,23 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            subreddits
-        """
+            subreddits, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/about/banned"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail), ('user', user)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+                ("user", user),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -2520,8 +3316,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            subreddits
-        """
+            subreddits, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/about"
@@ -2541,8 +3336,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            subreddits
-        """
+            subreddits, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/about/edit"
@@ -2551,7 +3345,17 @@ class RedditApp(APIApplication):
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_about_contributors(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None, user=None) -> Any:
+    def r_subreddit_about_contributors(
+        self,
+        subreddit,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        show=None,
+        sr_detail=None,
+        user=None,
+    ) -> Any:
         """
         Get the contributors for a subreddit.
 
@@ -2569,17 +3373,38 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            subreddits
-        """
+            subreddits, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/about/contributors"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail), ('user', user)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+                ("user", user),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_about_moderators(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None, user=None) -> Any:
+    def r_subreddit_about_moderators(
+        self,
+        subreddit,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        show=None,
+        sr_detail=None,
+        user=None,
+    ) -> Any:
         """
         Get the moderators for a subreddit.
 
@@ -2597,17 +3422,38 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            subreddits
-        """
+            subreddits, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/about/moderators"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail), ('user', user)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+                ("user", user),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_about_muted(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None, user=None) -> Any:
+    def r_subreddit_about_muted(
+        self,
+        subreddit,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        show=None,
+        sr_detail=None,
+        user=None,
+    ) -> Any:
         """
         Get the muted users for a subreddit.
 
@@ -2625,12 +3471,23 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            subreddits
-        """
+            subreddits, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/about/muted"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail), ('user', user)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+                ("user", user),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -2646,8 +3503,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            subreddits
-        """
+            subreddits, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/about/rules"
@@ -2668,12 +3524,11 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            subreddits
-        """
+            subreddits, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/sticky"
-        query_params = {k: v for k, v in [('num', num)] if v is not None}
+        query_params = {k: v for k, v in [("num", num)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -2689,8 +3544,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            subreddits
-        """
+            subreddits, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/about/traffic"
@@ -2699,7 +3553,17 @@ class RedditApp(APIApplication):
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_about_wikibanned(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None, user=None) -> Any:
+    def r_subreddit_about_wikibanned(
+        self,
+        subreddit,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        show=None,
+        sr_detail=None,
+        user=None,
+    ) -> Any:
         """
         Get the wikibanned users for a subreddit.
 
@@ -2717,17 +3581,38 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            subreddits
-        """
+            subreddits, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/about/wikibanned"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail), ('user', user)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+                ("user", user),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_about_wikicontributors(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None, user=None) -> Any:
+    def r_subreddit_about_wikicontributors(
+        self,
+        subreddit,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        show=None,
+        sr_detail=None,
+        user=None,
+    ) -> Any:
         """
         Get the wikicontributors for a subreddit.
 
@@ -2745,12 +3630,23 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            subreddits
-        """
+            subreddits, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/about/wikicontributors"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail), ('user', user)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+                ("user", user),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -2766,8 +3662,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            subreddits
-        """
+            subreddits, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/api/submit_text"
@@ -2776,7 +3671,16 @@ class RedditApp(APIApplication):
         response.raise_for_status()
         return response.json()
 
-    def subreddits_mine_where(self, where, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def subreddits_mine_where(
+        self,
+        where,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        show=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get the subreddits the current user has access to.
 
@@ -2793,17 +3697,40 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            subreddits
-        """
+            subreddits, readOnlyHint"""
         if where is None:
             raise ValueError("Missing required parameter 'where'")
         url = f"{self.base_url}/subreddits/mine/{where}"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def subreddits_search(self, after=None, before=None, count=None, limit=None, q=None, search_query_id=None, show=None, show_users=None, sort=None, sr_detail=None, typeahead_active=None) -> Any:
+    def subreddits_search(
+        self,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        q=None,
+        search_query_id=None,
+        show=None,
+        show_users=None,
+        sort=None,
+        sr_detail=None,
+        typeahead_active=None,
+    ) -> Any:
         """
         Search for subreddits.
 
@@ -2824,15 +3751,39 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            subreddits
-        """
+            subreddits, readOnlyHint"""
         url = f"{self.base_url}/subreddits/search"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('q', q), ('search_query_id', search_query_id), ('show', show), ('show_users', show_users), ('sort', sort), ('sr_detail', sr_detail), ('typeahead_active', typeahead_active)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("q", q),
+                ("search_query_id", search_query_id),
+                ("show", show),
+                ("show_users", show_users),
+                ("sort", sort),
+                ("sr_detail", sr_detail),
+                ("typeahead_active", typeahead_active),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def subreddits_where(self, where, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def subreddits_where(
+        self,
+        where,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        show=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get the subreddits the current user has access to.
 
@@ -2849,12 +3800,22 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            subreddits
-        """
+            subreddits, readOnlyHint"""
         if where is None:
             raise ValueError("Missing required parameter 'where'")
         url = f"{self.base_url}/subreddits/{where}"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -2870,10 +3831,9 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            users
-        """
+            users, readOnlyHint"""
         url = f"{self.base_url}/api/user_data_by_account_ids"
-        query_params = {k: v for k, v in [('ids', ids)] if v is not None}
+        query_params = {k: v for k, v in [("ids", ids)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -2889,10 +3849,9 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            users
-        """
+            users, readOnlyHint"""
         url = f"{self.base_url}/api/username_available"
-        query_params = {k: v for k, v in [('user', user)] if v is not None}
+        query_params = {k: v for k, v in [("user", user)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -2909,12 +3868,11 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            users
-        """
+            users, readOnlyHint"""
         if username is None:
             raise ValueError("Missing required parameter 'username'")
         url = f"{self.base_url}/api/v1/me/friends/{username}"
-        query_params = {k: v for k, v in [('id', id)] if v is not None}
+        query_params = {k: v for k, v in [("id", id)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -2931,12 +3889,11 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            users
-        """
+            users, destructiveHint"""
         if username is None:
             raise ValueError("Missing required parameter 'username'")
         url = f"{self.base_url}/api/v1/me/friends/{username}"
-        query_params = {k: v for k, v in [('id', id)] if v is not None}
+        query_params = {k: v for k, v in [("id", id)] if v is not None}
         response = self._delete(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -2953,12 +3910,11 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            users
-        """
+            users, readOnlyHint"""
         if username is None:
             raise ValueError("Missing required parameter 'username'")
         url = f"{self.base_url}/api/v1/user/{username}/trophies"
-        query_params = {k: v for k, v in [('id', id)] if v is not None}
+        query_params = {k: v for k, v in [("id", id)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -2974,17 +3930,30 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            users
-        """
+            users, readOnlyHint"""
         if username is None:
             raise ValueError("Missing required parameter 'username'")
         url = f"{self.base_url}/user/{username}/about"
-        query_params = {k: v for k, v in [('username', username)] if v is not None}
+        query_params = {k: v for k, v in [("username", username)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def user_username_where(self, username, where, after=None, before=None, context=None, count=None, limit=None, show=None, sort=None, sr_detail=None, t=None, type=None) -> Any:
+    def user_username_where(
+        self,
+        username,
+        where,
+        after=None,
+        before=None,
+        context=None,
+        count=None,
+        limit=None,
+        show=None,
+        sort=None,
+        sr_detail=None,
+        t=None,
+        type=None,
+    ) -> Any:
         """
         Get the user's posts or comments.
 
@@ -3006,19 +3975,46 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            users
-        """
+            users, readOnlyHint"""
         if username is None:
             raise ValueError("Missing required parameter 'username'")
         if where is None:
             raise ValueError("Missing required parameter 'where'")
         url = f"{self.base_url}/user/{username}/{where}"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('context', context), ('count', count), ('limit', limit), ('show', show), ('sort', sort), ('sr_detail', sr_detail), ('t', t), ('type', type), ('username', username)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("context", context),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sort", sort),
+                ("sr_detail", sr_detail),
+                ("t", t),
+                ("type", type),
+                ("username", username),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def users_search(self, after=None, before=None, count=None, limit=None, q=None, search_query_id=None, show=None, sort=None, sr_detail=None, typeahead_active=None) -> Any:
+    def users_search(
+        self,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        q=None,
+        search_query_id=None,
+        show=None,
+        sort=None,
+        sr_detail=None,
+        typeahead_active=None,
+    ) -> Any:
         """
         Search for users.
 
@@ -3038,15 +4034,38 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            users
-        """
+            users, readOnlyHint"""
         url = f"{self.base_url}/users/search"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('q', q), ('search_query_id', search_query_id), ('show', show), ('sort', sort), ('sr_detail', sr_detail), ('typeahead_active', typeahead_active)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("q", q),
+                ("search_query_id", search_query_id),
+                ("show", show),
+                ("sort", sort),
+                ("sr_detail", sr_detail),
+                ("typeahead_active", typeahead_active),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def users_where(self, where, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def users_where(
+        self,
+        where,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        show=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get the user's posts or comments.
 
@@ -3063,12 +4082,22 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            users
-        """
+            users, readOnlyHint"""
         if where is None:
             raise ValueError("Missing required parameter 'where'")
         url = f"{self.base_url}/users/{where}"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -3084,8 +4113,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            widgets
-        """
+            widgets, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/api/widgets"
@@ -3094,7 +4122,9 @@ class RedditApp(APIApplication):
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_api_widget_order_section(self, subreddit, section, items=None) -> Any:
+    def r_subreddit_api_widget_order_section(
+        self, subreddit, section, items=None
+    ) -> Any:
         """
         Get the widget order for a subreddit.
 
@@ -3106,13 +4136,11 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            widgets
-        """
+            widgets, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         if section is None:
             raise ValueError("Missing required parameter 'section'")
-        # Use items array directly as request body
         request_body = items
         url = f"{self.base_url}/r/{subreddit}/api/widget_order/{section}"
         query_params = {}
@@ -3132,8 +4160,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            widgets
-        """
+            widgets, destructiveHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         if widget_id is None:
@@ -3144,7 +4171,17 @@ class RedditApp(APIApplication):
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_wiki_discussions_page(self, subreddit, page, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def r_subreddit_wiki_discussions_page(
+        self,
+        subreddit,
+        page,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        show=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get the discussions for a wiki page.
 
@@ -3162,14 +4199,25 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            wiki
-        """
+            wiki, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         if page is None:
             raise ValueError("Missing required parameter 'page'")
         url = f"{self.base_url}/r/{subreddit}/wiki/discussions/{page}"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('page', page), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("page", page),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -3188,14 +4236,13 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            wiki
-        """
+            wiki, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         if page is None:
             raise ValueError("Missing required parameter 'page'")
         url = f"{self.base_url}/r/{subreddit}/wiki/{page}"
-        query_params = {k: v for k, v in [('v', v), ('v2', v2)] if v is not None}
+        query_params = {k: v for k, v in [("v", v), ("v2", v2)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -3211,8 +4258,7 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            wiki
-        """
+            wiki, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/wiki/pages"
@@ -3221,7 +4267,16 @@ class RedditApp(APIApplication):
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_wiki_revisions(self, subreddit, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def r_subreddit_wiki_revisions(
+        self,
+        subreddit,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        show=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get the revisions for a wiki.
 
@@ -3238,17 +4293,37 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            wiki
-        """
+            wiki, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         url = f"{self.base_url}/r/{subreddit}/wiki/revisions"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
 
-    def r_subreddit_wiki_revisions_page(self, subreddit, page, after=None, before=None, count=None, limit=None, show=None, sr_detail=None) -> Any:
+    def r_subreddit_wiki_revisions_page(
+        self,
+        subreddit,
+        page,
+        after=None,
+        before=None,
+        count=None,
+        limit=None,
+        show=None,
+        sr_detail=None,
+    ) -> Any:
         """
         Get the revisions for a wiki page.
 
@@ -3266,14 +4341,25 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            wiki
-        """
+            wiki, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         if page is None:
             raise ValueError("Missing required parameter 'page'")
         url = f"{self.base_url}/r/{subreddit}/wiki/revisions/{page}"
-        query_params = {k: v for k, v in [('after', after), ('before', before), ('count', count), ('limit', limit), ('page', page), ('show', show), ('sr_detail', sr_detail)] if v is not None}
+        query_params = {
+            k: v
+            for k, v in [
+                ("after", after),
+                ("before", before),
+                ("count", count),
+                ("limit", limit),
+                ("page", page),
+                ("show", show),
+                ("sr_detail", sr_detail),
+            ]
+            if v is not None
+        }
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -3290,14 +4376,13 @@ class RedditApp(APIApplication):
             Any: API response data.
 
         Tags:
-            wiki
-        """
+            wiki, readOnlyHint"""
         if subreddit is None:
             raise ValueError("Missing required parameter 'subreddit'")
         if page is None:
             raise ValueError("Missing required parameter 'page'")
         url = f"{self.base_url}/r/{subreddit}/wiki/settings/{page}"
-        query_params = {k: v for k, v in [('page', page)] if v is not None}
+        query_params = {k: v for k, v in [("page", page)] if v is not None}
         response = self._get(url, params=query_params)
         response.raise_for_status()
         return response.json()
@@ -3312,7 +4397,6 @@ class RedditApp(APIApplication):
             self.post_comment,
             self.edit_content,
             self.delete_content,
-        # Auto Generated from openapi spec
             self.api_v1_me,
             self.api_v1_me_karma,
             self.api_v1_me_prefs,
@@ -3429,4 +4513,3 @@ class RedditApp(APIApplication):
             self.r_subreddit_wiki_settings_page,
             self.get_post_comments_details,
         ]
-
